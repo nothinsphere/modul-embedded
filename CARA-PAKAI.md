@@ -7,6 +7,13 @@ Web ini dibuat dari "Modul Ajar Pemrograman Embedded C/C++ Berbasis Smartphone".
 - **Simulator Arduino Uno**: LED, tombol, potensiometer, LDR, NTC, buzzer, HC-SR04, Serial Monitor, dan plotter.
 - Asesmen: kuis pilihan ganda, tebak output, cari kesalahan (dinilai otomatis), dan kalkulator rubrik mini proyek.
 
+## Link website
+
+- Website untuk siswa: https://nothinsphere.github.io/modul-embedded/
+- Repositori GitHub: https://github.com/nothinsphere/modul-embedded
+
+Untuk memperbarui website setelah mengubah file, jalankan di folder ini: `git add -A`, `git commit -m "pesan perubahan"`, lalu `git push`. Bisa juga dengan **Add file → Upload files** di halaman repositori. Website ikut berubah sekitar 1 menit kemudian.
+
 ## Cara membuka
 
 - Di laptop/PC: klik dua kali `index.html`.

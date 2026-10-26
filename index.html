@@ -1,0 +1,1126 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Modul Embedded C/C++</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Modul ajar interaktif Pemrograman Embedded C/C++ berbasis smartphone untuk SMK kelas XI Teknik Elektronika, lengkap dengan compiler C/C++ dan simulator Arduino di browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="assets/style.css?v=7">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 21V5M8 7h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+    <symbol id="i-term" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M12 15h5"/></g></symbol>
+    <symbol id="i-chip" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="6" width="12" height="12" rx="1.5"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/></g></symbol>
+    <symbol id="i-ref" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></g></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></g></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></g></symbol>
+    <symbol id="i-map" viewBox="0 0 24 24"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2zM9 4v14M15 6v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5" fill="currentColor"/></symbol>
+    <symbol id="i-step" viewBox="0 0 24 24"><path d="M5 5v14l9-7z" fill="currentColor"/><path d="M17 5v14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></g></symbol>
+    <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></g></symbol>
+    <symbol id="i-mute" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/></g></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Navigasi">
+    <a class="brand" href="#beranda">
+      <svg class="brand-chip" viewBox="0 0 40 40" aria-hidden="true"><rect x="8" y="5" width="24" height="30" rx="3" fill="var(--mask)"/><g fill="var(--copper)"><rect x="3" y="9" width="5" height="3" rx="1"/><rect x="3" y="16" width="5" height="3" rx="1"/><rect x="3" y="23" width="5" height="3" rx="1"/><rect x="3" y="30" width="5" height="3" rx="1"/><rect x="32" y="9" width="5" height="3" rx="1"/><rect x="32" y="16" width="5" height="3" rx="1"/><rect x="32" y="23" width="5" height="3" rx="1"/><rect x="32" y="30" width="5" height="3" rx="1"/></g><circle cx="14" cy="10" r="2" fill="var(--mask-ink)" opacity=".7"/><text x="20" y="25" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="700" font-size="9" fill="var(--mask-ink)">C</text></svg>
+      <span><b>Embedded C/C++</b><small>SMK · XI Teknik Elektronika</small></span>
+    </a>
+    <div class="progress-box">
+      <div class="row"><span>Pertemuan selesai</span><b class="tnum" id="prog-text">0/16</b></div>
+      <div class="meter"><i id="prog-bar"></i></div>
+    </div>
+    <nav class="nav-group" aria-label="Mulai">
+      <div class="nav-label">Mulai</div>
+      <a class="nav-link" href="#beranda"><span class="nav-ico"><svg><use href="#i-home"/></svg></span>Beranda</a>
+      <a class="nav-link" href="#info"><span class="nav-ico"><svg><use href="#i-info"/></svg></span>Identitas &amp; tujuan</a>
+      <a class="nav-link" href="#persiapan"><span class="nav-ico"><svg><use href="#i-phone"/></svg></span>Persiapan aplikasi</a>
+      <a class="nav-link" href="#peta"><span class="nav-ico"><svg><use href="#i-map"/></svg></span>Peta 16 pertemuan</a>
+    </nav>
+    <nav class="nav-group" aria-label="Materi">
+      <div class="nav-label">Materi</div>
+      <a class="nav-link" href="#bab1"><span class="rbar b1"></span>Sistem embedded<span class="nav-sub">P1-2</span></a>
+      <a class="nav-link" href="#bab2"><span class="rbar b2"></span>Dasar bahasa C<span class="nav-sub">P3-5</span></a>
+      <a class="nav-link" href="#bab3"><span class="rbar b3"></span>Percabangan &amp; perulangan<span class="nav-sub">P6-7</span></a>
+      <a class="nav-link" href="#bab4"><span class="rbar b4"></span>Fungsi, array, C++<span class="nav-sub">P8-9</span></a>
+      <a class="nav-link" href="#bab5"><span class="rbar b5"></span>Arduino di simulator<span class="nav-sub">P11-13</span></a>
+      <a class="nav-link" href="#bab6"><span class="rbar b6"></span>Serial, analog, PWM<span class="nav-sub">P14-16</span></a>
+    </nav>
+    <nav class="nav-group" aria-label="Alat praktik">
+      <div class="nav-label">Alat praktik</div>
+      <a class="nav-link" href="#compiler"><span class="nav-ico"><svg><use href="#i-term"/></svg></span>Compiler C/C++</a>
+      <a class="nav-link" href="#simulator"><span class="nav-ico"><svg><use href="#i-chip"/></svg></span>Simulator Arduino</a>
+    </nav>
+    <nav class="nav-group" aria-label="Evaluasi">
+      <div class="nav-label">Evaluasi &amp; bantuan</div>
+      <a class="nav-link" href="#asesmen"><span class="nav-ico"><svg><use href="#i-check"/></svg></span>Asesmen &amp; kuis</a>
+      <a class="nav-link" href="#referensi"><span class="nav-ico"><svg><use href="#i-ref"/></svg></span>Error &amp; cheat sheet</a>
+    </nav>
+  </aside>
+  <div class="scrim" id="scrim" hidden></div>
+
+  <header class="topbar">
+    <button class="icon-btn menu-btn" id="menu-btn" type="button" aria-label="Buka menu" aria-controls="sidebar" aria-expanded="false"><svg><use href="#i-menu"/></svg></button>
+    <div class="topbar-title" id="topbar-title">Beranda</div>
+    <button class="icon-btn" id="theme-btn" type="button" aria-label="Ganti tema terang/gelap"><svg><use href="#i-moon"/></svg></button>
+  </header>
+
+  <main class="main" id="main">
+
+<!-- ============================== BERANDA ============================== -->
+<section class="view" id="v-beranda" data-title="Beranda">
+  <div class="wrap-wide">
+    <div class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">Modul ajar · SMK Teknik Elektronika · Kelas XI · Fase F</div>
+        <h1>Pemrograman <em>Embedded C/C++</em> cukup dari smartphone</h1>
+        <p class="lead">Dari nol pengalaman koding sampai memprogram rangkaian Arduino sederhana dalam 16 pertemuan. Setiap konsep C/C++ dicoba dulu di compiler, lalu langsung dipakai untuk mengendalikan LED, tombol, dan sensor di simulator.</p>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="#bab1">Mulai dari Bab 1</a>
+          <a class="btn btn-ghost" href="#compiler"><svg><use href="#i-term"/></svg>Compiler C/C++</a>
+          <a class="btn btn-ghost" href="#simulator"><svg><use href="#i-chip"/></svg>Simulator Arduino</a>
+        </div>
+      </div>
+      <div class="hero-demo">
+        <div class="demo-top">
+          <div id="hero-board"></div>
+          <div class="hero-led">
+            <svg viewBox="0 0 60 84" class="led-svg" aria-hidden="true"><line x1="24" y1="56" x2="24" y2="82" class="led-leg"/><line x1="36" y1="56" x2="36" y2="76" class="led-leg"/><path d="M12 56 V30 a18 18 0 0 1 36 0 V56 Z" fill="#7a2a26"/><path id="hero-led-lit" d="M12 56 V30 a18 18 0 0 1 36 0 V56 Z" fill="#ff3b30" opacity="0"/><rect x="9" y="54" width="42" height="5" rx="1.5" fill="#7a2a26"/><path d="M19 28 a11 11 0 0 1 9 -10" class="led-shine"/></svg>
+            <span>pin 13: <b id="hero-led-state" class="mono">LOW</b></span>
+          </div>
+        </div>
+        <pre class="hero-code" id="hero-code" aria-label="Kode Blink yang sedang berjalan"></pre>
+        <p class="small muted">Program Blink ini sedang berjalan. Baris berwarna adalah perintah yang sedang dikerjakan Arduino. Perhatikan: hampir seluruh waktunya habis menunggu di <code>delay()</code>.</p>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><b class="tnum">16</b><span>pertemuan × 4 JP (45 menit)</span></div>
+      <div class="fact"><b class="tnum">6</b><span>bab: dari algoritma sampai PWM</span></div>
+      <div class="fact"><b class="tnum">2</b><span>alat: compiler &amp; simulator, langsung di web ini</span></div>
+      <div class="fact"><b class="tnum">0</b><span>PC atau board fisik yang wajib dimiliki</span></div>
+    </div>
+
+    <section class="block">
+      <h2>Yang bisa dilakukan di web ini</h2>
+      <div class="grid">
+        <div class="card"><h3>Baca, lalu langsung coba</h3><p class="muted small">Setiap contoh kode di materi punya tombol <b>Jalankan</b>. Hasilnya muncul di bawah kode, termasuk input dari keyboard.</p></div>
+        <div class="card"><h3>Compiler C/C++ di browser</h3><p class="muted small">Tetap jalan tanpa internet setelah halaman terbuka. Pesan error memakai format GCC plus petunjuk berbahasa Indonesia, dan ada mode langkah demi langkah.</p></div>
+        <div class="card"><h3>Simulator Arduino Uno</h3><p class="muted small">LED, tombol, potensiometer, sensor cahaya, sensor suhu, buzzer, sensor jarak, Serial Monitor, dan plotter. Mirip Wokwi, tetapi ringan untuk HP.</p></div>
+        <div class="card"><h3>Kuis &amp; latihan otomatis</h3><p class="muted small">Kuis pilihan ganda, tebak output, cari kesalahan, dan kalkulator rubrik mini proyek untuk guru.</p></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Bab</h2>
+      <div class="chap-cards">
+        <a class="chap-card b1" href="#bab1"><span class="k"><span class="rbar b1"></span>Bab 1 · Pertemuan 1-2</span><h3>Sistem embedded &amp; cara berpikir programmer</h3><p>Input-proses-output, algoritma, flowchart.</p></a>
+        <a class="chap-card b2" href="#bab2"><span class="k"><span class="rbar b2"></span>Bab 2 · Pertemuan 3-5</span><h3>Dasar bahasa C</h3><p>printf, variabel, tipe data, scanf, operator.</p></a>
+        <a class="chap-card b3" href="#bab3"><span class="k"><span class="rbar b3"></span>Bab 3 · Pertemuan 6-7</span><h3>Percabangan &amp; perulangan</h3><p>if, else, switch, for, while.</p></a>
+        <a class="chap-card b4" href="#bab4"><span class="k"><span class="rbar b4"></span>Bab 4 · Pertemuan 8-9</span><h3>Fungsi, array, dan C++</h3><p>Membuat fungsi, menyimpan data sensor, cout dan cin.</p></a>
+        <a class="chap-card b5" href="#bab5"><span class="k"><span class="rbar b5"></span>Bab 5 · Pertemuan 11-13</span><h3>Arduino di simulator</h3><p>setup() dan loop(), Blink, lampu lalu lintas, tombol.</p></a>
+        <a class="chap-card b6" href="#bab6"><span class="k"><span class="rbar b6"></span>Bab 6 · Pertemuan 14-16</span><h3>Serial, analog, PWM, mini proyek</h3><p>Membaca sensor, mengatur terang LED, presentasi proyek.</p></a>
+      </div>
+      <p class="small muted">Warna penanda bab mengikuti kode warna resistor: 1 coklat, 2 merah, 3 oranye, 4 kuning, 5 hijau, 6 biru.</p>
+    </section>
+  </div>
+</section>
+
+<!-- ============================== INFO MODUL ============================== -->
+<section class="view" id="v-info" data-title="Identitas & tujuan" hidden>
+  <div class="wrap">
+    <div class="chap-head">
+      <div class="eyebrow">Identitas modul</div>
+      <h1>Identitas dan tujuan modul</h1>
+      <p class="lead">Modul ini membawa siswa dari nol pengalaman pemrograman sampai mampu memprogram rangkaian Arduino sederhana dalam 16 pertemuan, seluruhnya memakai smartphone.</p>
+    </div>
+    <div class="tbl-wrap">
+      <table class="tbl kv">
+        <tbody>
+          <tr><th>Satuan pendidikan</th><td>SMK</td></tr>
+          <tr><th>Program keahlian</th><td>Teknik Elektronika</td></tr>
+          <tr><th>Kelas / Fase</th><td>XI / Fase F (Kurikulum Merdeka)</td></tr>
+          <tr><th>Mata pelajaran</th><td>Pemrograman Embedded (Sistem Mikrokontroler)</td></tr>
+          <tr><th>Bahasa pemrograman</th><td>C dan dasar C++ (dialek Arduino)</td></tr>
+          <tr><th>Alokasi waktu</th><td>16 pertemuan × 4 JP (1 JP = 45 menit)</td></tr>
+          <tr><th>Prasyarat</th><td>Tidak ada; cukup bisa memakai smartphone dan paham dasar listrik (tegangan, arus, resistor, LED)</td></tr>
+          <tr><th>Sarana utama</th><td>Smartphone Android/iOS, koneksi internet (untuk simulator), proyektor/papan tulis guru</td></tr>
+          <tr><th>Model pembelajaran</th><td>Project Based Learning dan demonstrasi bertahap (lihat, tiru, ubah, buat)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <section class="block">
+      <h2>Capaian pembelajaran</h2>
+      <p>Pada akhir fase, peserta didik mampu menjelaskan konsep sistem embedded, menyusun algoritma, menulis program C/C++ dengan variabel, percabangan, perulangan, dan fungsi, serta menerapkannya untuk mengendalikan input/output mikrokontroler.</p>
+    </section>
+
+    <section class="block">
+      <h2>Tujuan pembelajaran</h2>
+      <ol class="list">
+        <li>Menjelaskan pengertian sistem embedded dan contohnya di sekitar siswa.</li>
+        <li>Menyusun algoritma dan flowchart untuk masalah sehari-hari.</li>
+        <li>Menulis, menjalankan, dan memperbaiki program C sederhana di smartphone.</li>
+        <li>Menggunakan variabel, tipe data, operator, input, dan output.</li>
+        <li>Menerapkan percabangan (<code>if</code>, <code>switch</code>) dan perulangan (<code>for</code>, <code>while</code>).</li>
+        <li>Membuat fungsi dan memakai array; mengenal perbedaan C dan C++.</li>
+        <li>Memprogram Arduino di simulator: output digital (LED), input digital (tombol), input analog (potensiometer/sensor), PWM, dan Serial Monitor.</li>
+        <li>Merancang dan mempresentasikan mini proyek embedded.</li>
+      </ol>
+    </section>
+
+    <section class="block">
+      <h2>Profil Pelajar Pancasila yang dikembangkan</h2>
+      <div class="grid">
+        <div class="card"><h3>Bernalar kritis</h3><p class="small muted">Memecah masalah menjadi langkah-langkah.</p></div>
+        <div class="card"><h3>Kreatif</h3><p class="small muted">Memodifikasi program contoh menjadi milik sendiri.</p></div>
+        <div class="card"><h3>Mandiri</h3><p class="small muted">Mencari dan memperbaiki kesalahan (debugging) sendiri.</p></div>
+        <div class="card"><h3>Gotong royong</h3><p class="small muted">Pair programming, satu HP berdua bila perlu.</p></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Pola belajar: lihat, tiru, ubah, buat</h2>
+      <ol class="list">
+        <li><b>Lihat</b>: guru mendemonstrasikan kode di layar HP yang ditampilkan ke proyektor.</li>
+        <li><b>Tiru</b>: siswa menyalin kode lalu menjalankannya.</li>
+        <li><b>Ubah</b>: siswa mengganti satu bagian dan mengamati perubahannya.</li>
+        <li><b>Buat</b>: siswa menulis program sendiri untuk soal yang sedikit berbeda.</li>
+      </ol>
+    </section>
+
+    <section class="block">
+      <h2>Strategi mengatasi kendala</h2>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>Kendala</th><th>Solusi dalam modul ini</th></tr></thead>
+          <tbody>
+            <tr><td>Siswa belum pernah memprogram</td><td>Mulai dari algoritma dan analogi sehari-hari; kode baru diperkenalkan di pertemuan 3; setiap kode pendek (5 sampai 15 baris).</td></tr>
+            <tr><td>Tidak ada PC</td><td>Compiler C/C++ di HP (Cxxdroid offline, OnlineGDB/Programiz via browser, atau compiler di web ini) dan simulator Arduino (Wokwi atau simulator di web ini).</td></tr>
+            <tr><td>Tidak ada board Arduino fisik</td><td>Semua praktik Arduino dilakukan di simulator; board fisik opsional bila sekolah punya (bisa di-upload dari HP Android lewat kabel OTG).</td></tr>
+            <tr><td>Mengetik kode di HP lambat</td><td>Sediakan kode awal (template) lewat grup WhatsApp/Google Classroom; siswa cukup menyalin lalu mengubah bagian tertentu. Di web ini ada baris tombol simbol <code>{ } ; # &lt; &gt;</code> di bawah editor.</td></tr>
+            <tr><td>HP siswa beragam / ada yang tidak punya</td><td>Pair programming 2 siswa per HP; tugas berbasis kertas (flowchart, tracing) untuk sebagian kegiatan.</td></tr>
+            <tr><td>Kuota internet terbatas</td><td>Bab 1 sampai 4 bisa offline penuh; simulator dipakai di Bab 5 dan 6 dan bisa memakai Wi-Fi sekolah.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</section>
+
+<!-- ============================== PERSIAPAN ============================== -->
+<section class="view" id="v-persiapan" data-title="Persiapan aplikasi" hidden>
+  <div class="wrap">
+    <div class="chap-head">
+      <div class="eyebrow">Persiapan · Pertemuan 1</div>
+      <h1>Aplikasi di smartphone</h1>
+      <p class="lead">Cukup dua alat: satu compiler C/C++ untuk Bab 1 sampai 4, dan satu simulator Arduino untuk Bab 5 dan 6. Nama aplikasi dan fiturnya bisa berubah, jadi guru sebaiknya mencoba dulu di HP sendiri sebelum kelas dimulai.</p>
+    </div>
+    <div class="callout tip">
+      <b class="t">Web ini sudah berisi keduanya</b>
+      <p>Menu <a href="#compiler">Compiler C/C++</a> dan <a href="#simulator">Simulator Arduino</a> bisa dipakai sebagai pengganti atau cadangan bila aplikasi di HP siswa bermasalah. Compiler-nya tetap berjalan tanpa internet setelah halaman terbuka.</p>
+    </div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Alat</th><th>Fungsi</th><th>Platform</th><th>Internet</th><th>Catatan</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://play.google.com/store/apps/details?id=ru.iiec.cxxdroid" target="_blank" rel="noopener">Cxxdroid</a></td><td>Menulis dan menjalankan program C/C++</td><td>Android</td><td>Tidak perlu setelah instal</td><td>Pilihan utama; ukuran kecil, bisa offline</td></tr>
+          <tr><td><a href="https://www.onlinegdb.com/" target="_blank" rel="noopener">OnlineGDB</a></td><td>Compiler C/C++ di browser</td><td>Semua HP (browser)</td><td>Perlu</td><td>Untuk iPhone atau HP yang memorinya penuh; pilih bahasa C atau C++ di kanan atas</td></tr>
+          <tr><td><a href="https://www.programiz.com/c-programming/online-compiler/" target="_blank" rel="noopener">Programiz Online Compiler</a></td><td>Compiler C ringan di browser</td><td>Semua HP</td><td>Perlu</td><td>Tampilan sederhana, cocok untuk pemula</td></tr>
+          <tr><td><a href="https://wokwi.com/projects/new/arduino-uno" target="_blank" rel="noopener">Wokwi</a></td><td>Simulator Arduino (board, LED, tombol, sensor, Serial Monitor)</td><td>Semua HP (browser)</td><td>Perlu</td><td>Tidak wajib daftar akun untuk mencoba, tetapi akun berguna untuk menyimpan proyek</td></tr>
+          <tr><td>ArduinoDroid (opsional)</td><td>Compile dan upload ke Arduino fisik lewat kabel OTG</td><td>Android</td><td>Perlu saat instal</td><td>Hanya bila sekolah punya board fisik</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <section class="block">
+      <h2>Langkah persiapan (pertemuan 1)</h2>
+      <ul class="checklist">
+        <li><label><input type="checkbox" data-save="prep1"><span>Instal Cxxdroid dari Play Store (Android). Pengguna iPhone membuka OnlineGDB di Safari/Chrome.</span></label></li>
+        <li><label><input type="checkbox" data-save="prep2"><span>Buka Cxxdroid, pastikan contoh "Hello World" bisa dijalankan dengan tombol Run (segitiga).</span></label></li>
+        <li><label><input type="checkbox" data-save="prep3"><span>Buka wokwi.com di browser HP, pilih Arduino Uno, lalu tekan tombol Play hijau pada contoh Blink.</span></label></li>
+        <li><label><input type="checkbox" data-save="prep4"><span>Putar layar ke mode landscape saat memakai Wokwi agar editor dan rangkaian terlihat bersamaan.</span></label></li>
+        <li><label><input type="checkbox" data-save="prep5"><span>Aktifkan keyboard dengan baris angka dan simbol, atau pasang keyboard khusus koding (misalnya Hacker's Keyboard di Android) agar karakter <code>{ } ; # &lt; &gt;</code> mudah diketik.</span></label></li>
+        <li><label><input type="checkbox" data-save="prep6"><span>Buat grup kelas (WhatsApp/Google Classroom) untuk berbagi template kode dan link proyek Wokwi.</span></label></li>
+      </ul>
+    </section>
+
+    <section class="block">
+      <h2>Tips memakai HP untuk koding</h2>
+      <ul class="list">
+        <li>Gunakan fitur auto-complete Cxxdroid untuk mengurangi salah ketik.</li>
+        <li>Simpan setiap program dengan nama jelas, misalnya <code>p03_variabel.c</code>.</li>
+        <li>Tutup aplikasi lain agar HP tidak lambat saat simulasi.</li>
+        <li>Bila layar kecil, perbesar font editor dan gunakan mode landscape.</li>
+        <li>Matikan fitur "tanda kutip pintar" (smart punctuation) di keyboard. Tanda kutip miring <code>“ ”</code> membuat program error.</li>
+      </ul>
+    </section>
+  </div>
+</section>
+
+<!-- ============================== PETA ============================== -->
+<section class="view" id="v-peta" data-title="Peta 16 pertemuan" hidden>
+  <div class="wrap">
+    <div class="chap-head">
+      <div class="eyebrow">Peta materi &amp; alokasi waktu</div>
+      <h1>Peta 16 pertemuan</h1>
+      <p class="lead">Urutannya sengaja lambat di awal: dua pertemuan tanpa kode, tujuh pertemuan dasar C/C++, satu asesmen, lalu enam pertemuan Arduino di simulator. Centang pertemuan yang sudah selesai untuk melihat kemajuan.</p>
+    </div>
+    <div class="meet-list" id="meet-list"></div>
+
+    <section class="block">
+      <h2>Pola setiap pertemuan (4 × 45 menit)</h2>
+      <div class="timebar" role="img" aria-label="Pembagian 180 menit: pembuka 15, demonstrasi 30, praktik terbimbing 60, tantangan mandiri 60, refleksi 15">
+        <div class="tb1" style="flex:15"><b>15'</b><span>Pembuka</span></div>
+        <div class="tb2" style="flex:30"><b>30'</b><span>Demonstrasi</span></div>
+        <div class="tb3" style="flex:60"><b>60'</b><span>Praktik terbimbing</span></div>
+        <div class="tb4" style="flex:60"><b>60'</b><span>Tantangan mandiri</span></div>
+        <div class="tb5" style="flex:15"><b>15'</b><span>Refleksi</span></div>
+      </div>
+      <ul class="list">
+        <li><b>Pembuka 15 menit</b>: apersepsi, cek HP siap, tujuan hari ini.</li>
+        <li><b>Demonstrasi guru 30 menit</b>: guru mengetik kode di HP yang ditampilkan ke proyektor (screen mirroring) atau menulis di papan.</li>
+        <li><b>Praktik terbimbing 60 menit</b>: siswa menyalin kode, menjalankan, lalu mengubah satu bagian.</li>
+        <li><b>Tantangan mandiri 60 menit</b>: soal sedikit berbeda dari contoh.</li>
+        <li><b>Refleksi 15 menit</b>: satu hal yang dipahami, satu error yang ditemui.</li>
+      </ul>
+    </section>
+  </div>
+</section>
+
+<!-- ============================== BAB 1 ============================== -->
+<section class="view" id="v-bab1" data-title="Bab 1 · Sistem embedded" hidden>
+  <div class="wrap">
+    <div class="chap-head">
+      <div class="eyebrow"><span class="rbar b1"></span>Bab 1 · Pertemuan 1-2</div>
+      <h1>Mengenal sistem embedded dan cara berpikir programmer</h1>
+      <p class="lead">Sistem embedded adalah komputer kecil yang ditanam di dalam alat untuk mengerjakan satu tugas khusus. Sebelum menulis kode, kita belajar memecah masalah menjadi langkah-langkah yang jelas (algoritma).</p>
+    </div>
+
+    <section class="block" id="s-1-1">
+      <h2><span class="num">1.1</span>Apa itu sistem embedded?</h2>
+      <p>Komputer biasa (laptop, HP) bisa mengerjakan banyak hal. Sistem embedded hanya mengerjakan satu tugas, tetapi terus-menerus dan andal. Otaknya disebut <b>mikrokontroler</b>, yaitu satu chip yang berisi prosesor, memori, dan pin input/output.</p>
+      <p>Contoh di sekitar kita: rice cooker (pindah otomatis ke mode hangat), mesin cuci, remote TV, dispenser, AC, lampu lalu lintas, timbangan digital, motor injeksi (ECU), dan mainan elektronik. Setiap sistem embedded punya tiga bagian: <b>input</b> (membaca keadaan sekitar), <b>proses</b> (mikrokontroler menjalankan program), dan <b>output</b> (melakukan aksi).</p>
+      <div class="widget" id="w-ipo">
+        <div class="widget-title">Bongkar alat: input, proses, output <span class="tag mask">interaktif</span></div>
+        <div class="seg" id="ipo-tabs" role="tablist" aria-label="Pilih alat"></div>
+        <div class="ipo" id="ipo-body" aria-live="polite"></div>
+      </div>
+      <p>Program yang mengatur bagian <b>proses</b> itulah yang akan kita tulis dalam bahasa C/C++.</p>
+      <div class="widget" id="w-cooker">
+        <div class="widget-title">Rice cooker dari dalam <span class="tag mask">simulasi</span></div>
+        <div class="cooker">
+          <svg viewBox="0 0 120 130" aria-hidden="true">
+            <rect x="14" y="44" width="92" height="70" rx="14" fill="var(--sunk)" stroke="var(--ink-3)" stroke-width="2"/>
+            <path d="M10 46 q50 -34 100 0 z" fill="var(--card)" stroke="var(--ink-3)" stroke-width="2"/>
+            <rect x="52" y="16" width="16" height="8" rx="4" fill="var(--ink-3)"/>
+            <rect x="30" y="70" width="60" height="22" rx="4" fill="var(--term-bg)"/>
+            <text id="ck-temp" x="60" y="86" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" font-weight="700" fill="#7dffb0">30°C</text>
+            <circle id="ck-cook" class="lamp" cx="42" cy="104" r="5" fill="#4a2a2a"/>
+            <circle id="ck-warm" class="lamp" cx="78" cy="104" r="5" fill="#4a442a"/>
+            <text x="42" y="124" text-anchor="middle" font-size="8" fill="var(--ink-3)" font-family="Plus Jakarta Sans, sans-serif">COOK</text>
+            <text x="78" y="124" text-anchor="middle" font-size="8" fill="var(--ink-3)" font-family="Plus Jakarta Sans, sans-serif">WARM</text>
+          </svg>
+          <div class="stack">
+            <pre class="codeviz" id="ck-code"></pre>
+            <div class="btn-row"><button class="btn btn-primary small" id="ck-start" type="button">Tekan tombol Cook</button><button class="btn btn-ghost small" id="ck-reset" type="button">Ulang</button><span class="small muted" id="ck-state">Siap</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="s-1-2">
+      <h2><span class="num">1.2</span>Apa itu program dan bahasa pemrograman?</h2>
+      <p><b>Program</b> adalah daftar perintah untuk komputer. Komputer tidak paham bahasa Indonesia, hanya angka biner (0 dan 1). Bahasa C/C++ adalah "bahasa tengah" yang bisa dibaca manusia, lalu diterjemahkan oleh <b>compiler</b> menjadi kode biner.</p>
+      <div class="callout"><b class="t">Analogi</b><p>Resep masakan (program) ditulis koki (programmer), lalu diterjemahkan (compiler) ke bahasa juru masak lain (mikrokontroler) yang mengikuti setiap langkah persis apa adanya, tanpa menebak.</p></div>
+      <p>C dipilih karena paling banyak dipakai di mikrokontroler, cepat, dan hemat memori. Arduino memakai C++ yang dasarnya sama dengan C.</p>
+    </section>
+
+    <section class="block" id="s-1-3">
+      <h2><span class="num">1.3</span>Algoritma</h2>
+      <p><b>Algoritma</b> adalah langkah-langkah logis dan berurutan untuk menyelesaikan masalah. Syaratnya: jelas, berurutan, dan ada akhirnya. Contoh algoritma menyalakan lampu kamar otomatis:</p>
+      <ol class="list">
+        <li>Mulai.</li>
+        <li>Baca sensor cahaya.</li>
+        <li>Jika ruangan gelap, nyalakan lampu.</li>
+        <li>Jika ruangan terang, matikan lampu.</li>
+        <li>Ulangi ke langkah 2.</li>
+      </ol>
+      <div class="widget" id="w-order">
+        <div class="widget-title">Susun algoritmanya <span class="tag mask">latihan</span></div>
+        <div class="seg" id="order-tabs" role="tablist" aria-label="Pilih soal"></div>
+        <p class="small muted" id="order-prompt"></p>
+        <div class="order-cols">
+          <div class="stack"><b class="small">Langkah acak (ketuk untuk memilih)</b><div class="order-pool" id="order-pool"></div></div>
+          <div class="stack"><b class="small">Urutanmu</b><div class="order-picked" id="order-picked"></div></div>
+        </div>
+        <div class="btn-row"><button class="btn btn-primary small" type="button" id="order-check">Periksa</button><button class="btn btn-ghost small" type="button" id="order-reset">Acak ulang</button><span class="verdict" id="order-verdict" aria-live="polite"></span></div>
+      </div>
+    </section>
+
+    <section class="block" id="s-1-4">
+      <h2><span class="num">1.4</span>Flowchart</h2>
+      <p>Flowchart adalah algoritma dalam bentuk gambar. Simbol yang dipakai di modul ini:</p>
+      <div class="tbl-wrap sym-table">
+        <table class="tbl">
+          <thead><tr><th>Simbol</th><th>Bentuk</th><th>Arti</th></tr></thead>
+          <tbody>
+            <tr><td><svg viewBox="0 0 56 30"><ellipse cx="28" cy="15" rx="25" ry="11"/></svg></td><td>Oval (terminal)</td><td>Mulai / Selesai</td></tr>
+            <tr><td><svg viewBox="0 0 56 30"><path d="M12 4h41l-9 22H3z"/></svg></td><td>Jajar genjang (input/output)</td><td>Membaca data atau menampilkan hasil</td></tr>
+            <tr><td><svg viewBox="0 0 56 30"><rect x="4" y="4" width="48" height="22"/></svg></td><td>Persegi panjang (proses)</td><td>Perhitungan atau aksi</td></tr>
+            <tr><td><svg viewBox="0 0 56 30"><path d="M28 2l25 13-25 13L3 15z"/></svg></td><td>Belah ketupat (keputusan)</td><td>Pertanyaan Ya/Tidak</td></tr>
+            <tr><td><svg viewBox="0 0 56 30"><path d="M4 15h40" style="fill:none"/><path d="M44 9l9 6-9 6z" style="fill:var(--ink-2);stroke:none"/></svg></td><td>Panah (garis alir)</td><td>Arah urutan langkah</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="widget" id="w-flow">
+        <div class="widget-title">Flowchart yang bergerak <span class="tag mask">animasi</span></div>
+        <div class="seg" id="flow-tabs" role="tablist" aria-label="Pilih flowchart">
+          <button type="button" class="on" data-f="tl">Lampu lalu lintas</button>
+          <button type="button" data-f="kamar">Lampu kamar otomatis</button>
+        </div>
+        <div class="flow-wrap">
+          <div class="flow">
+            <svg id="flow-tl" viewBox="0 0 300 250" role="img" aria-label="Flowchart lampu lalu lintas">
+              <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fl-head"/></marker></defs>
+              <ellipse id="tl-start" class="fl-shape" cx="150" cy="22" rx="48" ry="15"/><text class="fl-text" x="150" y="26" text-anchor="middle">Mulai</text>
+              <path class="fl-arrow" d="M150 37V56" marker-end="url(#ah)"/>
+              <rect id="tl-red" class="fl-shape" x="75" y="58" width="150" height="34" rx="2"/><text class="fl-text" x="150" y="79" text-anchor="middle">Merah nyala 5 detik</text>
+              <path class="fl-arrow" d="M150 92V110" marker-end="url(#ah)"/>
+              <rect id="tl-yellow" class="fl-shape" x="75" y="112" width="150" height="34" rx="2"/><text class="fl-text" x="150" y="133" text-anchor="middle">Kuning nyala 2 detik</text>
+              <path class="fl-arrow" d="M150 146V164" marker-end="url(#ah)"/>
+              <rect id="tl-green" class="fl-shape" x="75" y="166" width="150" height="34" rx="2"/><text class="fl-text" x="150" y="187" text-anchor="middle">Hijau nyala 5 detik</text>
+              <path class="fl-arrow" d="M150 200V226H40V75H73" marker-end="url(#ah)"/>
+              <text class="fl-text" x="34" y="150" text-anchor="middle" transform="rotate(-90 34 150)">ulangi</text>
+            </svg>
+            <svg id="flow-kamar" viewBox="0 0 320 270" role="img" aria-label="Flowchart lampu kamar otomatis" hidden>
+              <ellipse id="km-start" class="fl-shape" cx="170" cy="20" rx="48" ry="15"/><text class="fl-text" x="170" y="24" text-anchor="middle">Mulai</text>
+              <path class="fl-arrow" d="M170 35V50" marker-end="url(#ah)"/>
+              <path id="km-read" class="fl-shape" d="M118 52H252L234 86H100Z"/><text class="fl-text" x="176" y="73" text-anchor="middle">Baca sensor cahaya</text>
+              <path class="fl-arrow" d="M170 86V102" marker-end="url(#ah)"/>
+              <path id="km-dec" class="fl-shape" d="M170 104L244 134L170 164L96 134Z"/><text class="fl-text" x="170" y="138" text-anchor="middle">Ruangan gelap?</text>
+              <path class="fl-arrow" d="M96 134H80V188" marker-end="url(#ah)"/><text class="fl-text" x="86" y="127" text-anchor="middle">Ya</text>
+              <path class="fl-arrow" d="M244 134H262V188" marker-end="url(#ah)"/><text class="fl-text" x="254" y="127" text-anchor="middle">Tidak</text>
+              <rect id="km-on" class="fl-shape" x="30" y="190" width="100" height="34" rx="2"/><text class="fl-text" x="80" y="211" text-anchor="middle">Nyalakan lampu</text>
+              <rect id="km-off" class="fl-shape" x="212" y="190" width="100" height="34" rx="2"/><text class="fl-text" x="262" y="211" text-anchor="middle">Matikan lampu</text>
+              <path class="fl-arrow" d="M80 224V246M262 224V246H14V69H107" marker-end="url(#ah)"/>
+              <text class="fl-text" x="9" y="160" text-anchor="middle" transform="rotate(-90 9 160)">ulangi ke langkah 2</text>
+            </svg>
+          </div>
+          <svg class="tlight" id="flow-light" viewBox="0 0 70 170" aria-hidden="true">
+            <rect class="tl-box" x="5" y="5" width="60" height="160" rx="12"/>
+            <circle id="lamp-r" class="tl-lamp" cx="35" cy="35" r="20"/>
+            <circle id="lamp-y" class="tl-lamp" cx="35" cy="85" r="20"/>
+            <circle id="lamp-g" class="tl-lamp" cx="35" cy="135" r="20"/>
+          </svg>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary small" type="button" id="flow-play"><svg><use href="#i-play"/></svg>Jalankan</button>
+          <div class="seg" id="flow-speed"><button type="button" class="on" data-s="1">Waktu asli</button><button type="button" data-s="4">Cepat ×4</button></div>
+          <div class="seg" id="flow-cond" hidden><button type="button" class="on" data-c="1">Kondisi: gelap</button><button type="button" data-c="0">Kondisi: terang</button></div>
+        </div>
+        <p class="small muted">Program mikrokontroler memang sengaja tidak punya simbol "Selesai": ia berulang selama alatnya menyala.</p>
+      </div>
+      <p>Siswa menggambar flowchart di buku tulis, lalu memotretnya untuk dikumpulkan. Alternatif digital: aplikasi gratis seperti <a href="https://app.diagrams.net/" target="_blank" rel="noopener">draw.io</a> di browser HP.</p>
+    </section>
+
+    <section class="block">
+      <h2>Kegiatan siswa</h2>
+      <ul class="checklist">
+        <li><label><input type="checkbox" data-save="k1a"><span>Pertemuan 1: tulis 10 alat embedded di rumah, isi tabel Input-Proses-Output untuk 3 alat.</span></label></li>
+        <li><label><input type="checkbox" data-save="k1b"><span>Pertemuan 1: instal Cxxdroid atau buka OnlineGDB dan jalankan contoh Hello World.</span></label></li>
+        <li><label><input type="checkbox" data-save="k1c"><span>Pertemuan 2: tulis algoritma dan gambar flowchart lampu lalu lintas (merah 5 detik, kuning 2 detik, hijau 5 detik, ulangi).</span></label></li>
+        <li><label><input type="checkbox" data-save="k1d"><span>Pertemuan 2: tulis algoritma dan flowchart pompa air otomatis (pompa nyala jika tandon kosong, mati jika penuh).</span></label></li>
+      </ul>
+    </section>
+
+    <section class="block">
+      <h2>Latihan pemahaman</h2>
+      <details class="reveal"><summary>Apa perbedaan komputer biasa dan sistem embedded?</summary><div><p>Komputer biasa serbaguna dan bisa menjalankan banyak program berbeda. Sistem embedded dirancang untuk satu tugas khusus, dijalankan terus-menerus dan andal, dan biasanya tertanam di dalam alat.</p></div></details>
+      <details class="reveal"><summary>Sebutkan input, proses, dan output pada dispenser air panas.</summary><div><p>Input: sensor suhu air dan tombol. Proses: mikrokontroler membandingkan suhu dengan batas yang diinginkan. Output: pemanas dinyalakan/dimatikan dan lampu indikator.</p></div></details>
+      <details class="reveal"><summary>Mengapa program perlu diterjemahkan oleh compiler?</summary><div><p>Karena mikrokontroler hanya memahami kode biner (0 dan 1). Compiler menerjemahkan kode C/C++ yang mudah dibaca manusia menjadi kode biner tersebut.</p></div></details>
+      <details class="reveal"><summary>Simbol apa yang dipakai untuk pertanyaan "Apakah tombol ditekan?"</summary><div><p>Belah ketupat (simbol keputusan), dengan dua jalur keluar: Ya dan Tidak.</p></div></details>
+    </section>
+
+    <nav class="pager"><a href="#peta"><small>Sebelumnya</small>Peta 16 pertemuan</a><a class="next" href="#bab2"><small>Berikutnya</small>Bab 2 · Dasar bahasa C</a></nav>
+  </div>
+</section>
+
+<!-- ============================== BAB 2 ============================== -->
+<section class="view" id="v-bab2" data-title="Bab 2 · Dasar bahasa C" hidden>
+  <div class="wrap">
+    <div class="chap-head">
+      <div class="eyebrow"><span class="rbar b2"></span>Bab 2 · Pertemuan 3-5</div>
+      <h1>Dasar bahasa C</h1>
+      <p class="lead">Menulis program pertama, menyimpan data dalam variabel, menerima input, dan menghitung rumus elektronika. Semua kode di bab ini bisa dijalankan langsung di halaman ini, di Cxxdroid, atau di OnlineGDB.</p>
+    </div>
+
+    <section class="block" id="s-2-1">
+      <h2><span class="num">2.1</span>Program pertama</h2>
+      <p class="small muted">Ketuk salah satu baris kode untuk membaca penjelasannya.</p>
+      <div class="snippet" data-ex="b2-hello" data-annot="hello"></div>
+      <p>Cara menjalankan di Cxxdroid: ketik kode, tekan tombol Run (segitiga), hasil muncul di layar terminal. Di halaman ini cukup tekan <b>Jalankan</b>.</p>
+      <div class="callout"><b class="t">Latihan 2.1</b><p>Buat program yang menampilkan nama, kelas, dan cita-cita dalam 3 baris.</p></div>
+      <div class="snippet" data-ex="b2-biodata"></div>
+    </section>
+
+    <section class="block" id="s-2-2">
+      <h2><span class="num">2.2</span>Variabel dan tipe data</h2>
+      <p><b>Variabel</b> adalah "kotak" bernama untuk menyimpan data. Setiap kotak punya jenis isi (tipe data).</p>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>Tipe data</th><th>Isi</th><th>Contoh</th><th>Format printf/scanf</th></tr></thead>
+          <tbody>
+            <tr><td><code>int</code></td><td>Bilangan bulat</td><td><code>int jumlahLED = 3;</code></td><td><code>%d</code></td></tr>
+            <tr><td><code>float</code></td><td>Bilangan desimal</td><td><code>float tegangan = 4.5;</code></td><td><code>%f</code></td></tr>
+            <tr><td><code>char</code></td><td>Satu karakter</td><td><code>char warna = 'M';</code></td><td><code>%c</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Aturan nama variabel: tidak boleh diawali angka, tidak boleh ada spasi, huruf besar dan kecil dibedakan (<code>Tegangan</code> berbeda dengan <code>tegangan</code>).</p>
+      <div class="widget" id="w-var">
+        <div class="widget-title">Pembuat variabel <span class="tag mask">interaktif</span></div>
+        <div class="oplab-in">
+          <label class="field">Nama variabel<input type="text" id="var-name" value="tegangan" autocomplete="off" spellcheck="false"></label>
+          <label class="field">Tipe data<select id="var-type"><option value="int">int</option><option value="float" selected>float</option><option value="char">char</option></select></label>
+          <label class="field">Nilai awal<input type="text" id="var-val" value="4.5" autocomplete="off"></label>
+        </div>
+        <p class="res" id="var-res" aria-live="polite"></p>
+        <div class="decl-out" id="var-out"></div>
+      </div>
+      <div class="snippet" data-ex="b2-arus"></div>
+      <p><code>%.3f</code> menampilkan bilangan desimal dengan 3 angka di belakang koma.</p>
+      <div class="snippet" data-ex="b2-tipe"></div>
+    </section>
+
+    <section class="block" id="s-2-3">
+      <h2><span class="num">2.3</span>Input dengan scanf</h2>
+      <p>Tekan <b>Jalankan</b>, lalu ketik angka di terminal dan tekan Enter (atau tombol Kirim).</p>
+      <div class="snippet" data-ex="b2-scanf"></div>
+      <p>Tanda <code>&amp;</code> sebelum nama variabel wajib dipakai pada <code>scanf</code>. Artinya "simpan ke alamat variabel ini". Coba hapus tanda <code>&amp;</code> di compiler, lalu lihat apa yang terjadi.</p>
+    </section>
+
+    <section class="block" id="s-2-4">
+      <h2><span class="num">2.4</span>Operator</h2>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>Jenis</th><th>Operator</th><th>Contoh</th><th>Hasil</th></tr></thead>
+          <tbody>
+            <tr><td>Aritmatika</td><td><code>+ - * /</code></td><td><code>10 / 4</code></td><td>2 (int) atau 2.5 (float)</td></tr>
+            <tr><td>Sisa bagi</td><td><code>%</code></td><td><code>10 % 4</code></td><td>2</td></tr>
+            <tr><td>Perbandingan</td><td><code>== != &gt; &lt; &gt;= &lt;=</code></td><td><code>5 &gt; 3</code></td><td>1 (benar)</td></tr>
+            <tr><td>Logika</td><td><code>&amp;&amp; || !</code></td><td><code>(5&gt;3) &amp;&amp; (2&gt;4)</code></td><td>0 (salah)</td></tr>
+            <tr><td>Penugasan</td><td><code>= += -= ++ --</code></td><td><code>x++</code></td><td>x bertambah 1</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout warn"><b class="t">Perhatian</b><p><code>=</code> berarti mengisi nilai, sedangkan <code>==</code> berarti membandingkan. Pembagian dua <code>int</code> membuang angka desimal.</p></div>
+      <div class="widget" id="w-op">
+        <div class="widget-title">Lab operator <span class="tag mask">interaktif</span></div>
+        <div class="oplab-in">
+          <label class="field">a<input type="number" id="op-a" value="10" step="any"></label>
+          <label class="field">b<input type="number" id="op-b" value="4" step="any"></label>
+          <div class="field">Tipe variabel<div class="seg" id="op-type"><button type="button" class="on" data-t="int">int</button><button type="button" data-t="float">float</button></div></div>
+        </div>
+        <div class="tbl-wrap"><table class="tbl" id="op-table"><thead><tr><th>Ekspresi</th><th>Hasil di C</th><th>Keterangan</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="snippet" data-ex="b2-operator"></div>
+    </section>
+
+    <section class="block">
+      <h2>Tugas Bab 2</h2>
+      <div class="stack">
+        <div class="card"><h3>1. Kalkulator hukum Ohm</h3><p class="small">Input tegangan dan resistansi, tampilkan arus dan daya (P = V × I).</p><div class="btn-row"><button class="btn btn-ghost small" type="button" data-open="b2-tugas-ohm">Kerjakan di compiler</button></div></div>
+        <div class="card"><h3>2. Resistor seri</h3><p class="small">Input R1, R2, R3, tampilkan R total.</p><div class="btn-row"><button class="btn btn-ghost small" type="button" data-open="b2-tugas-seri">Kerjakan di compiler</button></div></div>
+        <div class="card"><h3>3. Resistor untuk LED</h3><p class="small">Input tegangan sumber, tegangan LED, dan arus LED (dalam mA); rumus R = (Vs − Vled) / I.</p><div class="btn-row"><button class="btn btn-ghost small" type="button" data-open="b2-tugas-rled">Kerjakan di compiler</button></div></div>
+        <div class="card"><h3>4. Tracing di kertas</h3><p class="small">Tuliskan hasil printf dari program tanpa menjalankannya, lalu cocokkan. Latihan otomatisnya ada di <a href="#asesmen">Asesmen · Tebak output</a>.</p></div>
+      </div>
+    </section>
+
+    <nav class="pager"><a href="#bab1"><small>Sebelumnya</small>Bab 1 · Sistem embedded</a><a class="next" href="#bab3"><small>Berikutnya</small>Bab 3 · Percabangan &amp; perulangan</a></nav>
+  </div>
+</section>
+
+<!-- ============================== BAB 3 ============================== -->
+<section class="view" id="v-bab3" data-title="Bab 3 · Percabangan & perulangan" hidden>
+  <div class="wrap">
+    <div class="chap-head">
+      <div class="eyebrow"><span class="rbar b3"></span>Bab 3 · Pertemuan 6-7</div>
+      <h1>Percabangan dan perulangan</h1>
+      <p class="lead">Percabangan membuat program bisa memilih, perulangan membuat program bisa mengulang. Keduanya inti setiap program mikrokontroler, misalnya "jika gelap nyalakan lampu" dan "ulangi terus selamanya".</p>
+    </div>
+
+    <section class="block" id="s-3-1">
+      <h2><span class="num">3.1</span>if dan else</h2>
+      <div class="widget" id="w-if">
+        <div class="widget-title">Geser suhunya, lihat jalur yang dipilih <span class="tag mask">interaktif</span></div>
+        <div class="range-row"><label for="if-suhu" class="small"><b>suhu</b></label><input type="range" id="if-suhu" min="15" max="40" value="27"><output id="if-out" class="tnum">27</output></div>
+        <div class="cooker">
+          <svg viewBox="0 0 100 100" aria-hidden="true" style="width:100px"><g id="fan" style="transform-origin:50px 50px"><path d="M50 50 C40 30 45 12 55 10 C66 12 62 34 50 50 Z M50 50 C70 40 88 45 90 55 C88 66 66 62 50 50 Z M50 50 C60 70 55 88 45 90 C34 88 38 66 50 50 Z M50 50 C30 60 12 55 10 45 C12 34 34 38 50 50 Z" fill="var(--mask)" opacity=".85"/></g><circle cx="50" cy="50" r="7" fill="var(--ink-2)"/></svg>
+          <div class="stack"><pre class="codeviz" id="if-code"></pre><div class="decl-out" id="if-term">Kipas: PELAN</div></div>
+        </div>
+      </div>
+      <p>Kondisi di dalam kurung diperiksa dari atas ke bawah. Begitu satu kondisi benar, bloknya dijalankan dan sisanya dilewati.</p>
+      <div class="snippet" data-ex="b3-if"></div>
+    </section>
+
+    <section class="block" id="s-3-2">
+      <h2><span class="num">3.2</span>switch</h2>
+      <p><code>switch</code> cocok untuk memilih dari beberapa nilai pasti, misalnya menu atau kode warna resistor.</p>
+      <div class="widget" id="w-switch">
+        <div class="widget-title">Pita resistor &amp; switch <span class="tag mask">interaktif</span></div>
+        <svg class="resistor" viewBox="0 0 300 70" aria-hidden="true">
+          <line class="res-lead" x1="0" y1="35" x2="60" y2="35"/><line class="res-lead" x1="240" y1="35" x2="300" y2="35"/>
+          <rect class="res-body" x="60" y="14" width="180" height="42" rx="18"/>
+          <rect id="sw-band" x="95" y="14" width="16" height="42" fill="#7b4a2b"/>
+          <rect x="135" y="14" width="16" height="42" fill="#000" opacity=".1"/><rect x="170" y="14" width="16" height="42" fill="#000" opacity=".1"/><rect x="210" y="14" width="10" height="42" fill="#c8a24a" opacity=".6"/>
+        </svg>
+        <div class="btn-row">
+          <label class="field" style="flex-direction:row">pita = <select id="sw-pita"><option>0</option><option selected>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
+          <label class="part-check small"><input type="checkbox" id="sw-nobreak"> hapus semua <code>break</code></label>
+        </div>
+        <pre class="codeviz" id="sw-code"></pre>
+        <div class="decl-out" id="sw-term"></div>
+      </div>
+      <p>Lupa <code>break</code> membuat program terus menjalankan case berikutnya. Coba centang "hapus semua break" di atas.</p>
+      <div class="snippet" data-ex="b3-switch"></div>
+    </section>
+
+    <section class="block" id="s-3-3">
+      <h2><span class="num">3.3</span>Perulangan for</h2>
+      <p>Dipakai bila jumlah ulangan sudah diketahui. Bagian <code>for (awal; syarat; perubahan)</code>: mulai dari <code>i = 1</code>, ulangi selama <code>i &lt;= 5</code>, tambah <code>i</code> satu setiap putaran.</p>
+      <div class="widget" id="w-for">
+        <div class="widget-title">Jalankan perulangan pelan-pelan <span class="tag mask">langkah demi langkah</span></div>
+        <pre class="codeviz" id="for-code"></pre>
+        <div class="loopviz" id="for-bulbs"></div>
+        <div class="stat-row"><div><b id="for-i" class="tnum">–</b><span>nilai i</span></div><div><b id="for-cond">–</b><span>syarat i &lt;= 5</span></div><div><b id="for-n" class="tnum">0</b><span>putaran</span></div></div>
+        <div class="btn-row"><button class="btn btn-primary small" type="button" id="for-step"><svg><use href="#i-step"/></svg>Langkah</button><button class="btn btn-ghost small" type="button" id="for-auto"><svg><use href="#i-play"/></svg>Otomatis</button><button class="btn btn-ghost small" type="button" id="for-reset">Ulang</button></div>
+        <p class="small muted" id="for-explain" aria-live="polite">Tekan Langkah untuk mulai.</p>
+      </div>
+      <div class="snippet" data-ex="b3-for"></div>
+    </section>
+
+    <section class="block" id="s-3-4">
+      <h2><span class="num">3.4</span>Perulangan while</h2>
+      <p>Dipakai bila ulangan bergantung pada kondisi. Tombol <b>Langkah</b> pada contoh di bawah menjalankan program baris demi baris sambil menampilkan isi variabel.</p>
+      <div class="snippet" data-ex="b3-while"></div>
+      <div class="callout"><b class="t">Infinite loop</b><p>Jika syarat tidak pernah salah, program berulang selamanya. Di komputer ini error, tetapi di mikrokontroler justru sengaja dipakai: fungsi <code>loop()</code> Arduino adalah perulangan tanpa akhir.</p></div>
+    </section>
+
+    <section class="block">
+      <h2>Tugas Bab 3</h2>
+      <div class="stack">
+        <div class="card"><h3>1. Status baterai</h3><p class="small">Input persen baterai; tampilkan "Penuh" (≥ 80), "Sedang" (30-79), "Lemah" (&lt; 30).</p><div class="btn-row"><button class="btn btn-ghost small" type="button" data-open="b3-tugas-baterai">Kerjakan di compiler</button></div></div>
+        <div class="card"><h3>2. Lampu lalu lintas dengan switch</h3><p class="small">Input 1/2/3, tampilkan Merah/Kuning/Hijau dan lama nyalanya.</p><div class="btn-row"><button class="btn btn-ghost small" type="button" data-open="b3-tugas-lampu">Kerjakan di compiler</button></div></div>
+        <div class="card"><h3>3. Tabel arus</h3><p class="small">Dengan for, tampilkan arus untuk resistor 100, 200, …, 1000 ohm pada tegangan 5 V.</p><div class="btn-row"><button class="btn btn-ghost small" type="button" data-open="b3-tugas-tabel">Kerjakan di compiler</button></div></div>
+        <div class="card"><h3>4. Password sederhana</h3><p class="small">Dengan while, ulangi minta input angka sampai pengguna memasukkan 1234.</p><div class="btn-row"><button class="btn btn-ghost small" type="button" data-open="b3-tugas-password">Kerjakan di compiler</button></div></div>
+      </div>
+    </section>
+
+    <nav class="pager"><a href="#bab2"><small>Sebelumnya</small>Bab 2 · Dasar bahasa C</a><a class="next" href="#bab4"><small>Berikutnya</small>Bab 4 · Fungsi, array, C++</a></nav>
+  </div>
+</section>
+
+<!-- ============================== BAB 4 ============================== -->
+<section class="view" id="v-bab4" data-title="Bab 4 · Fungsi, array, C++" hidden>
+  <div class="wrap">
+    <div class="chap-head">
+      <div class="eyebrow"><span class="rbar b4"></span>Bab 4 · Pertemuan 8-9</div>
+      <h1>Fungsi, array, dan pengenalan C++</h1>
+      <p class="lead">Fungsi membungkus perintah yang sering dipakai agar program rapi; array menyimpan banyak data sejenis. Di akhir bab kita melihat bahwa C++ adalah C dengan tambahan fitur, persis bahasa yang dipakai Arduino.</p>
+    </div>
+
+    <section class="block" id="s-4-1">
+      <h2><span class="num">4.1</span>Fungsi</h2>
+      <div class="widget" id="w-fn">
+        <div class="widget-title">Mesin fungsi hitungDaya <span class="tag mask">interaktif</span></div>
+        <div class="blender">
+          <div class="stack">
+            <label class="field">v (volt)<input type="number" id="fn-v" value="12" step="any"></label>
+            <label class="field">i (ampere)<input type="number" id="fn-i" value="0.5" step="any"></label>
+          </div>
+          <div class="machine">float hitungDaya(v, i)<br>return v * i;</div>
+          <div class="outbox"><b id="fn-out" class="tnum">6.00</b><span class="small muted">watt (nilai return)</span></div>
+        </div>
+        <div class="decl-out" id="fn-call">float p = hitungDaya(12.0, 0.5);</div>
+      </div>
+      <div class="snippet" data-ex="b4-fungsi"></div>
+      <p>Analogi: fungsi seperti blender. Masukkan bahan (parameter), tekan tombol (panggil fungsi), keluar jus (nilai <code>return</code>). Fungsi tanpa hasil memakai tipe <code>void</code>, misalnya <code>void tampilGaris()</code>.</p>
+      <p>Kita sudah memakai fungsi sejak awal: <code>main</code>, <code>printf</code>, dan <code>scanf</code> semuanya fungsi. Di Arduino nanti ada <code>setup</code>, <code>loop</code>, dan <code>digitalWrite</code>.</p>
+    </section>
+
+    <section class="block" id="s-4-2">
+      <h2><span class="num">4.2</span>Array</h2>
+      <div class="widget" id="w-arr">
+        <div class="widget-title">Isi array suhu[5] <span class="tag mask">interaktif</span></div>
+        <div class="arrviz" id="arr-cells"></div>
+        <div class="stat-row"><div><b id="arr-total" class="tnum">0</b><span>total</span></div><div><b id="arr-avg" class="tnum">0</b><span>rata-rata</span></div></div>
+        <div class="btn-row"><label class="field" style="flex-direction:row;align-items:center">Ambil <code>suhu[</code><input type="number" id="arr-idx" value="2" style="width:70px"><code>]</code></label><span id="arr-get" class="verdict" aria-live="polite"></span></div>
+      </div>
+      <div class="snippet" data-ex="b4-array"></div>
+      <p>Indeks array dimulai dari 0, jadi array 5 elemen punya indeks 0 sampai 4. Di Arduino, array sering dipakai untuk menyimpan nomor pin, misalnya <code>int pinLED[3] = {11, 12, 13};</code>.</p>
+    </section>
+
+    <section class="block" id="s-4-3">
+      <h2><span class="num">4.3</span>Dari C ke C++</h2>
+      <p>Program C umumnya tetap jalan di C++. Perbedaan yang terlihat pemula:</p>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>Hal</th><th>C</th><th>C++</th></tr></thead>
+          <tbody>
+            <tr><td>Pustaka I/O</td><td><code>#include &lt;stdio.h&gt;</code></td><td><code>#include &lt;iostream&gt;</code></td></tr>
+            <tr><td>Menampilkan</td><td><code>printf("Nilai %d", x);</code></td><td><code>cout &lt;&lt; "Nilai " &lt;&lt; x;</code></td></tr>
+            <tr><td>Input</td><td><code>scanf("%d", &amp;x);</code></td><td><code>cin &gt;&gt; x;</code></td></tr>
+            <tr><td>Tipe benar/salah</td><td>Pakai <code>int</code> (0/1)</td><td>Ada <code>bool</code> (<code>true</code>/<code>false</code>)</td></tr>
+            <tr><td>Objek</td><td>Tidak ada</td><td>Ada class dan objek, misalnya <code>Serial.println()</code> di Arduino</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="compare">
+        <div class="snippet" data-ex="b4-c"></div>
+        <div class="snippet" data-ex="b4-cpp"></div>
+      </div>
+      <p>Di Cxxdroid, simpan file dengan akhiran <code>.cpp</code> agar dijalankan sebagai C++. Di OnlineGDB atau compiler web ini, pilih bahasa C++. Cukup kenalkan bahwa <code>Serial.println()</code> artinya "panggil fungsi println milik objek Serial"; pembahasan class lebih dalam tidak diperlukan di kelas XI.</p>
+    </section>
+
+    <section class="block">
+      <h2>Tugas Bab 4</h2>
+      <div class="stack">
+        <div class="card"><h3>1. Fungsi hitungRLED</h3><p class="small">Buat fungsi <code>hitungRLED(vs, vled, i)</code> yang mengembalikan nilai resistor LED.</p><div class="btn-row"><button class="btn btn-ghost small" type="button" data-open="b4-tugas-rled">Kerjakan di compiler</button></div></div>
+        <div class="card"><h3>2. Tertinggi dan terendah</h3><p class="small">Simpan 6 nilai tegangan baterai dalam array, tampilkan nilai tertinggi dan terendah.</p><div class="btn-row"><button class="btn btn-ghost small" type="button" data-open="b4-tugas-minmax">Kerjakan di compiler</button></div></div>
+        <div class="card"><h3>3. Hukum Ohm versi C++</h3><p class="small">Ubah program Tugas Bab 2 nomor 1 menjadi versi C++ dengan cout dan cin.</p><div class="btn-row"><button class="btn btn-ghost small" type="button" data-open="b4-tugas-ohm-cpp">Kerjakan di compiler</button></div></div>
+      </div>
+    </section>
+
+    <nav class="pager"><a href="#bab3"><small>Sebelumnya</small>Bab 3 · Percabangan &amp; perulangan</a><a class="next" href="#bab5"><small>Berikutnya</small>Bab 5 · Arduino di simulator</a></nav>
+  </div>
+</section>
+
+<!-- ============================== BAB 5 ============================== -->
+<section class="view" id="v-bab5" data-title="Bab 5 · Arduino di simulator" hidden>
+  <div class="wrap">
+    <div class="chap-head">
+      <div class="eyebrow"><span class="rbar b5"></span>Bab 5 · Pertemuan 11-13</div>
+      <h1>Memprogram Arduino di simulator</h1>
+      <p class="lead">Semua yang dipelajari di Bab 2-4 kini dipakai untuk mengendalikan perangkat keras virtual. Arduino Uno di simulator berperilaku seperti board asli, sehingga kode yang sama bisa langsung di-upload ke board fisik kelak.</p>
+    </div>
+
+    <section class="block" id="s-5-1">
+      <h2><span class="num">5.1</span>Mengenal Arduino Uno</h2>
+      <p>Arduino Uno memakai mikrokontroler ATmega328P dengan 14 pin digital (D0-D13, enam di antaranya bisa PWM: 3, 5, 6, 9, 10, 11), 6 pin analog (A0-A5), tegangan kerja 5 V, dan LED bawaan di pin 13.</p>
+      <div class="widget" id="w-pinmap">
+        <div class="widget-title">Kenali pinnya <span class="tag mask">ketuk pin</span></div>
+        <div class="board-wrap"><div id="pinmap-board"></div></div>
+        <p class="pinmap-info" id="pinmap-info" aria-live="polite">Ketuk salah satu lubang pin pada papan (baris atas: digital, baris bawah kanan: analog).</p>
+      </div>
+    </section>
+
+    <section class="block" id="s-5-2">
+      <h2><span class="num">5.2</span>Struktur program Arduino</h2>
+      <div class="snippet" data-code="void setup() {
+  // dijalankan SEKALI saat Arduino menyala
+}
+
+void loop() {
+  // dijalankan BERULANG terus-menerus
+}" data-name="sketch.ino"></div>
+      <div class="widget" id="w-setuploop">
+        <div class="widget-title">Urutan kerja setup() dan loop() <span class="tag mask">animasi</span></div>
+        <div class="loopanim">
+          <div class="box" id="sl-power"><b>Arduino menyala</b><span>tegangan masuk / tombol reset</span></div>
+          <div class="box" id="sl-setup"><b>setup()</b><span>sekali saja: atur pinMode, Serial.begin</span></div>
+          <div class="box" id="sl-loop"><b>loop()</b><span>berulang: <span id="sl-count" class="mono">0</span> kali</span></div>
+        </div>
+        <div class="btn-row"><button class="btn btn-primary small" type="button" id="sl-play"><svg><use href="#i-play"/></svg>Nyalakan</button><button class="btn btn-ghost small" type="button" id="sl-reset"><svg><use href="#i-reset"/></svg>Tekan reset</button></div>
+      </div>
+      <p>Bandingkan dengan program C biasa: tidak ada <code>main()</code> karena Arduino sudah menyediakannya; <code>loop()</code> adalah perulangan tanpa akhir seperti yang dibahas di Bab 3.</p>
+    </section>
+
+    <section class="block" id="s-5-3">
+      <h2><span class="num">5.3</span>Cara memakai simulator di HP</h2>
+      <p>Langkah di Wokwi:</p>
+      <ol class="list">
+        <li>Buka wokwi.com, pilih Arduino Uno pada bagian proyek baru.</li>
+        <li>Layar terbagi dua: editor kode (sketch.ino) dan area rangkaian. Di HP, geser atau putar landscape untuk berpindah.</li>
+        <li>Tambah komponen dengan tombol + (biru) di area rangkaian, cari "LED", "Resistor", atau "Pushbutton".</li>
+        <li>Sambungkan kabel dengan mengetuk ujung pin komponen, lalu ketuk pin tujuan di Arduino.</li>
+        <li>Ketuk komponen untuk mengubah sifatnya, misalnya warna LED atau nilai resistor (220 ohm).</li>
+        <li>Tekan tombol Play hijau untuk menjalankan simulasi, tombol Stop untuk berhenti.</li>
+        <li>Simpan proyek (perlu login) lalu bagikan link-nya ke guru sebagai bukti tugas.</li>
+      </ol>
+      <div class="callout tip"><b class="t">Di web ini</b><p>Menu <a href="#simulator">Simulator Arduino</a> bekerja mirip: tulis kode di tab Kode, pasang komponen dengan "Tambah komponen" dan pilih pinnya, lalu tekan Jalankan. Di HP, pindah antara tab <b>Kode</b> dan <b>Rangkaian</b>.</p></div>
+    </section>
+
+    <section class="block" id="s-5-4">
+      <h2><span class="num">5.4</span>Praktik 1: LED berkedip (Blink)</h2>
+      <p>Rangkaian: anoda LED (kaki panjang) ke pin 13 lewat resistor 220 ohm, katoda ke GND.</p>
+      <div class="snippet" data-ex="ard-blink"></div>
+      <div class="callout"><b class="t">Tantangan</b><p>Ubah agar LED berkedip cepat (200 ms), lalu buat pola SOS.</p></div>
+      <details class="reveal"><summary>Lihat contoh jawaban SOS</summary><div><div class="snippet" data-ex="ard-sos"></div></div></details>
+    </section>
+
+    <section class="block" id="s-5-5">
+      <h2><span class="num">5.5</span>Praktik 2: Lampu lalu lintas</h2>
+      <p>Rangkaian: LED merah di pin 11, kuning di pin 12, hijau di pin 13, masing-masing dengan resistor 220 ohm ke GND.</p>
+      <div class="snippet" data-ex="ard-lalulintas"></div>
+      <div class="callout"><b class="t">Tantangan</b><p>Buat running LED 5 buah memakai array pin dan perulangan for.</p></div>
+      <details class="reveal"><summary>Lihat contoh jawaban running LED</summary><div><div class="snippet" data-ex="ard-running"></div></div></details>
+    </section>
+
+    <section class="block" id="s-5-6">
+      <h2><span class="num">5.6</span>Praktik 3: Tombol (input digital)</h2>
+      <p>Rangkaian: satu kaki pushbutton ke pin 2, kaki lain ke GND. LED di pin 13.</p>
+      <div class="snippet" data-ex="ard-tombol"></div>
+      <p>Dengan <code>INPUT_PULLUP</code>, pin bernilai HIGH saat tombol dilepas dan LOW saat ditekan, karena resistor pull-up internal menarik pin ke 5 V. Saat tombol ditekan, pin tersambung langsung ke GND. Coba ganti menjadi <code>INPUT</code> di simulator: tanpa pull-up, pin "mengambang" dan nilainya acak.</p>
+      <div class="callout"><b class="t">Tantangan</b><p>Buat tombol toggle (tekan sekali nyala, tekan lagi mati) memakai variabel <code>bool</code>.</p></div>
+      <details class="reveal"><summary>Lihat contoh jawaban tombol toggle</summary><div><div class="snippet" data-ex="ard-toggle"></div></div></details>
+    </section>
+
+    <nav class="pager"><a href="#bab4"><small>Sebelumnya</small>Bab 4 · Fungsi, array, C++</a><a class="next" href="#bab6"><small>Berikutnya</small>Bab 6 · Serial, analog, PWM</a></nav>
+  </div>
+</section>
+
+<!-- ============================== BAB 6 ============================== -->
+<section class="view" id="v-bab6" data-title="Bab 6 · Serial, analog, PWM" hidden>
+  <div class="wrap">
+    <div class="chap-head">
+      <div class="eyebrow"><span class="rbar b6"></span>Bab 6 · Pertemuan 14-16</div>
+      <h1>Serial Monitor, input analog, PWM, dan mini proyek</h1>
+      <p class="lead">Membaca nilai sensor, menampilkannya di Serial Monitor, dan mengatur terang LED. Bab ini ditutup dengan mini proyek yang menggabungkan semua materi.</p>
+    </div>
+
+    <section class="block" id="s-6-1">
+      <h2><span class="num">6.1</span>Serial Monitor</h2>
+      <p>Serial Monitor adalah "layar printf" milik Arduino. Di simulator, ia muncul di bawah rangkaian saat simulasi berjalan.</p>
+      <div class="snippet" data-ex="ard-serial"></div>
+      <p><code>Serial.print</code> tidak pindah baris, <code>Serial.println</code> pindah baris. Serial Monitor juga alat debugging utama: tampilkan nilai variabel untuk mencari kesalahan.</p>
+    </section>
+
+    <section class="block" id="s-6-2">
+      <h2><span class="num">6.2</span>Input analog dengan potensiometer</h2>
+      <p>Rangkaian: kaki kiri potensiometer ke 5V, kaki kanan ke GND, kaki tengah ke A0. ADC Arduino Uno 10 bit, sehingga tegangan 0-5 V diubah menjadi angka 0-1023.</p>
+      <div class="widget" id="w-adc">
+        <div class="widget-title">Pengubah analog ke digital (ADC 10 bit) <span class="tag mask">interaktif</span></div>
+        <div class="range-row"><label for="adc-v" class="small"><b>tegangan A0</b></label><input type="range" id="adc-v" min="0" max="5" step="0.01" value="2.5"><output id="adc-vo" class="tnum">2.50 V</output></div>
+        <div class="stat-row"><div><b id="adc-n" class="tnum">512</b><span>analogRead(A0)</span></div><div><b id="adc-back" class="tnum">2.50</b><span>nilai * 5.0 / 1023.0</span></div></div>
+        <div class="adc-bits" id="adc-bits" aria-label="Nilai biner 10 bit"></div>
+        <p class="small muted">Setiap kenaikan 1 angka ADC setara ±4,9 mV (5 V ÷ 1023).</p>
+      </div>
+      <div class="snippet" data-ex="ard-pot"></div>
+      <p>Variasi sensor yang tersedia di Wokwi dan di simulator ini: photoresistor (LDR) untuk cahaya, NTC untuk suhu, dan sensor ultrasonik HC-SR04 untuk jarak. DHT22 butuh library tambahan, jadi gunakan Wokwi bila ingin mencobanya.</p>
+    </section>
+
+    <section class="block" id="s-6-3">
+      <h2><span class="num">6.3</span>PWM: mengatur terang LED</h2>
+      <p>PWM menyalakan dan mematikan pin sangat cepat sehingga LED terlihat redup atau terang. Nilai 0 berarti mati, 255 berarti terang penuh. Hanya pin bertanda ~ (3, 5, 6, 9, 10, 11) yang bisa PWM.</p>
+      <div class="widget" id="w-pwm">
+        <div class="widget-title">Gelombang PWM <span class="tag mask">interaktif</span></div>
+        <div class="range-row"><label for="pwm-v" class="small"><b class="mono">analogWrite(9, </b></label><input type="range" id="pwm-v" min="0" max="255" value="64"><output id="pwm-vo" class="tnum mono">64)</output></div>
+        <svg class="pwm-wave" id="pwm-wave" viewBox="0 0 320 90" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <div class="stat-row"><div><b id="pwm-duty" class="tnum">25%</b><span>duty cycle</span></div><div><b id="pwm-avg" class="tnum">1.25 V</b><span>tegangan rata-rata</span></div><div class="pwm-led" id="pwm-led" aria-hidden="true"></div></div>
+      </div>
+      <div class="snippet" data-ex="ard-pwm"></div>
+      <p>Fungsi <code>map()</code> mengubah rentang 0-1023 menjadi 0-255. Arduino menghitungnya dengan bilangan bulat, jadi hasilnya dibulatkan ke bawah.</p>
+      <div class="widget" id="w-map">
+        <div class="widget-title">Kalkulator map() <span class="tag mask">interaktif</span></div>
+        <div class="oplab-in">
+          <label class="field">x<input type="number" id="map-x" value="512"></label>
+          <label class="field">dari min<input type="number" id="map-a" value="0"></label>
+          <label class="field">dari max<input type="number" id="map-b" value="1023"></label>
+          <label class="field">ke min<input type="number" id="map-c" value="0"></label>
+          <label class="field">ke max<input type="number" id="map-d" value="255"></label>
+        </div>
+        <div class="decl-out" id="map-out"></div>
+      </div>
+      <details class="reveal"><summary>Bonus: buzzer memainkan tangga nada dengan tone()</summary><div><div class="snippet" data-ex="ard-buzzer"></div></div></details>
+    </section>
+
+    <section class="block" id="s-6-4">
+      <h2><span class="num">6.4</span>Mini proyek (pertemuan 15-16)</h2>
+      <p>Siswa bekerja berpasangan, memilih satu proyek, membuatnya di simulator, lalu mempresentasikan link proyek dan penjelasan kodenya. Setiap proyek punya <b>kerangka</b> (berisi TODO untuk dilengkapi) dan <b>contoh jadi</b> untuk referensi guru.</p>
+      <div class="grid" id="proj-grid"></div>
+      <div class="callout"><b class="t">Isi laporan singkat</b><p>Boleh foto tulisan tangan: judul, flowchart, gambar rangkaian (screenshot simulator), kode, dan penjelasan cara kerja. Penilaiannya memakai <a href="#asesmen">rubrik sumatif 2</a>.</p></div>
+    </section>
+
+    <nav class="pager"><a href="#bab5"><small>Sebelumnya</small>Bab 5 · Arduino di simulator</a><a class="next" href="#asesmen"><small>Berikutnya</small>Asesmen &amp; kuis</a></nav>
+  </div>
+</section>
+
+<!-- ============================== COMPILER ============================== -->
+<section class="view" id="v-compiler" data-title="Compiler C/C++" hidden>
+  <div class="wrap-wide">
+    <div class="chap-head">
+      <div class="eyebrow">Alat praktik</div>
+      <h1>Compiler C/C++</h1>
+      <p class="lead">Tulis, jalankan, dan perbaiki program langsung di browser. Input <code>scanf</code>/<code>cin</code> diketik di terminal. Pesan error memakai format GCC ditambah petunjuk berbahasa Indonesia.</p>
+    </div>
+    <div class="toolbar">
+      <div class="seg" id="cc-lang" role="tablist" aria-label="Bahasa"><button type="button" class="on" data-lang="c">C</button><button type="button" data-lang="cpp">C++</button></div>
+      <select id="cc-example" aria-label="Muat contoh"></select>
+      <button class="btn btn-primary" type="button" id="cc-run"><svg><use href="#i-play"/></svg>Jalankan</button>
+      <button class="btn btn-ghost" type="button" id="cc-step"><svg><use href="#i-step"/></svg>Langkah</button>
+      <button class="btn btn-ghost" type="button" id="cc-stop" disabled><svg><use href="#i-stop"/></svg>Stop</button>
+    </div>
+    <div class="seg mobile-tabs" id="cc-tabs" role="tablist" aria-label="Panel"><button type="button" class="on" data-p="code">Kode</button><button type="button" data-p="run">Hasil</button></div>
+    <div class="tool-grid" id="cc-grid" data-pane="code">
+      <div class="tool-col pane-code">
+        <div class="editor">
+          <div class="editor-head"><span class="fname" id="cc-fname">main.c</span><button class="btn-ghost btn small" type="button" id="cc-copy"><svg><use href="#i-copy"/></svg>Salin</button><button class="btn-ghost btn small" type="button" id="cc-clear">Kosongkan</button></div>
+          <div id="cc-editor"></div>
+          <div class="symbar" data-for="cc"></div>
+        </div>
+        <div class="panel trace" id="cc-trace" hidden>
+          <h3>Mode langkah <span class="tag" id="cc-trace-line">baris –</span></h3>
+          <div class="tbl-wrap"><table class="trace-vars"><thead><tr><th>Variabel</th><th>Tipe</th><th>Nilai</th></tr></thead><tbody id="cc-trace-vars"></tbody></table></div>
+          <div class="trace-stack" id="cc-trace-stack"></div>
+          <div class="btn-row">
+            <button class="btn btn-primary small" type="button" id="cc-next"><svg><use href="#i-step"/></svg>Langkah berikutnya</button>
+            <button class="btn btn-ghost small" type="button" id="cc-auto"><svg><use href="#i-play"/></svg>Otomatis</button>
+            <button class="btn btn-ghost small" type="button" id="cc-finish">Jalankan sampai selesai</button>
+          </div>
+          <p class="small muted">Baris berwarna di editor adalah baris yang <b>akan</b> dijalankan berikutnya. Output tetap muncul di terminal.</p>
+        </div>
+        <div class="diags" id="cc-diags" aria-live="polite"></div>
+      </div>
+      <div class="tool-col pane-run sticky">
+        <div class="out-panel"><div class="term" id="cc-term"></div></div>
+        <div class="callout small">
+          <b class="t">Tentang compiler ini</b>
+          <p>Ini interpreter C/C++ ringan buatan khusus untuk belajar: mendukung variabel, operator, <code>if</code>, <code>switch</code>, perulangan, fungsi, array, <code>printf/scanf</code>, <code>cout/cin</code>, dan pustaka <code>math.h</code>/<code>string.h</code> dasar. Pointer, struct, dan class belum didukung. Untuk compiler GCC lengkap, salin kode lalu buka <a href="https://www.onlinegdb.com/" target="_blank" rel="noopener">OnlineGDB</a> atau <a href="https://www.programiz.com/c-programming/online-compiler/" target="_blank" rel="noopener">Programiz</a>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== SIMULATOR ============================== -->
+<section class="view" id="v-simulator" data-title="Simulator Arduino" hidden>
+  <div class="wrap-wide">
+    <div class="chap-head">
+      <div class="eyebrow">Alat praktik</div>
+      <h1>Simulator Arduino Uno</h1>
+      <p class="lead">Tulis sketch, pasang komponen, lalu jalankan. LED, tombol, sensor, buzzer, dan Serial Monitor bereaksi seperti rangkaian asli.</p>
+    </div>
+    <div class="toolbar">
+      <select id="sim-example" aria-label="Muat contoh sketch"></select>
+      <button class="btn btn-primary" type="button" id="sim-run"><svg><use href="#i-play"/></svg>Jalankan</button>
+      <button class="btn btn-ghost" type="button" id="sim-stop" disabled><svg><use href="#i-stop"/></svg>Stop</button>
+      <button class="icon-btn" type="button" id="sim-sound" aria-label="Matikan suara buzzer" aria-pressed="false"><svg><use href="#i-sound"/></svg></button>
+      <a class="btn btn-ghost" href="https://wokwi.com/projects/new/arduino-uno" target="_blank" rel="noopener"><svg><use href="#i-ext"/></svg>Wokwi</a>
+    </div>
+    <div class="seg mobile-tabs" id="sim-tabs" role="tablist" aria-label="Panel"><button type="button" class="on" data-p="code">Kode</button><button type="button" data-p="run">Rangkaian</button></div>
+    <div class="tool-grid" id="sim-grid" data-pane="code">
+      <div class="tool-col pane-code">
+        <div class="editor">
+          <div class="editor-head"><span class="fname">sketch.ino</span><span id="sim-status" class="tag">berhenti</span><button class="btn-ghost btn small" type="button" id="sim-copy"><svg><use href="#i-copy"/></svg>Salin</button></div>
+          <div id="sim-editor"></div>
+          <div class="symbar" data-for="sim"></div>
+        </div>
+        <div class="diags" id="sim-diags" aria-live="polite"></div>
+      </div>
+      <div class="tool-col pane-run sticky">
+        <div class="board-wrap">
+          <div id="sim-board"></div>
+          <div class="pins" id="sim-pins" aria-label="Status pin"></div>
+        </div>
+        <div class="notes" id="sim-notes" aria-live="polite"></div>
+        <div class="panel">
+          <h3>Komponen</h3>
+          <div class="parts" id="sim-parts"></div>
+          <div class="add-menu" id="sim-add">
+            <span class="small muted" style="align-self:center">Tambah komponen:</span>
+            <button class="btn btn-ghost small" type="button" data-add="led"><svg><use href="#i-plus"/></svg>LED</button>
+            <button class="btn btn-ghost small" type="button" data-add="button"><svg><use href="#i-plus"/></svg>Tombol</button>
+            <button class="btn btn-ghost small" type="button" data-add="pot"><svg><use href="#i-plus"/></svg>Potensiometer</button>
+            <button class="btn btn-ghost small" type="button" data-add="ldr"><svg><use href="#i-plus"/></svg>LDR</button>
+            <button class="btn btn-ghost small" type="button" data-add="ntc"><svg><use href="#i-plus"/></svg>NTC</button>
+            <button class="btn btn-ghost small" type="button" data-add="buzzer"><svg><use href="#i-plus"/></svg>Buzzer</button>
+            <button class="btn btn-ghost small" type="button" data-add="ultrasonic"><svg><use href="#i-plus"/></svg>HC-SR04</button>
+          </div>
+        </div>
+        <div class="serial" id="sim-serial"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== ASESMEN ============================== -->
+<section class="view" id="v-asesmen" data-title="Asesmen & kuis" hidden>
+  <div class="wrap">
+    <div class="chap-head">
+      <div class="eyebrow">Asesmen</div>
+      <h1>Asesmen dan kuis</h1>
+      <p class="lead">Penilaian dibagi tiga: diagnostik di pertemuan 1, formatif setiap pertemuan, dan sumatif di pertemuan 10 dan 16. Bobot terbesar ada pada praktik, bukan hafalan.</p>
+    </div>
+
+    <section class="block">
+      <h2>Asesmen diagnostik (pertemuan 1)</h2>
+      <p>Angket singkat lewat Google Form atau kertas:</p>
+      <ul class="list">
+        <li>Jenis HP (Android/iPhone) dan sisa memori penyimpanan.</li>
+        <li>Apakah punya kuota/akses Wi-Fi?</li>
+        <li>Pernah mendengar istilah program, coding, atau Arduino?</li>
+        <li>Apakah bisa mengetik simbol <code>{ } ; #</code> di keyboard HP?</li>
+        <li>Soal logika: urutkan langkah membuat mi instan (ada versi interaktifnya di <a href="#bab1">Bab 1 · 1.3</a>).</li>
+      </ul>
+      <p class="small muted">Hasilnya dipakai untuk membentuk pasangan (siswa yang lebih siap dipasangkan dengan yang belum) dan menentukan siapa yang memakai Cxxdroid atau OnlineGDB.</p>
+    </section>
+
+    <section class="block">
+      <h2>Asesmen formatif</h2>
+      <ul class="list">
+        <li><b>Tiket keluar</b>: siswa mengirim screenshot hasil program ke grup kelas sebelum pulang.</li>
+        <li><b>Tracing kode</b>: tebak output program tanpa menjalankannya (latihan di bawah).</li>
+        <li><b>Cari kesalahan (debugging)</b>: guru memberi kode berisi 2-3 error, siswa memperbaikinya (latihan di bawah).</li>
+      </ul>
+    </section>
+
+    <section class="block" id="s-kuis">
+      <h2>Kuis pilihan ganda</h2>
+      <p class="small muted">15 soal dari Bab 1 sampai 6. Jawaban dicek saat kamu memilih.</p>
+      <div class="score" id="quiz-score"><b class="tnum" id="quiz-num">0/15</b><span class="muted small" id="quiz-msg">Belum ada jawaban.</span><button class="btn btn-ghost small" type="button" id="quiz-reset" style="margin-left:auto">Ulangi kuis</button></div>
+      <div class="quiz" id="quiz"></div>
+    </section>
+
+    <section class="block" id="s-tebak">
+      <h2>Tebak output (tracing)</h2>
+      <p class="small muted">Tulis output program tanpa menjalankannya, lalu tekan Periksa. Jawabanmu dibandingkan dengan hasil program yang sebenarnya.</p>
+      <div class="quiz" id="trace-quiz"></div>
+    </section>
+
+    <section class="block" id="s-debug">
+      <h2>Cari kesalahan (debugging)</h2>
+      <p class="small muted">Setiap program berisi 2 kesalahan. Perbaiki langsung di kotak kode, lalu tekan Periksa. Lulus jika tidak ada error/peringatan dan outputnya benar.</p>
+      <div class="quiz" id="debug-quiz"></div>
+    </section>
+
+    <section class="block">
+      <h2>Contoh soal sumatif 1 (pertemuan 10)</h2>
+      <h3>Tertulis</h3>
+      <details class="reveal"><summary>1. Apa output dari: <code>int a = 7, b = 2; printf("%d", a / b);</code></summary><div><p><b>3</b>. Pembagian dua int membuang angka desimal (3.5 menjadi 3).</p></div></details>
+      <details class="reveal"><summary>2. Apa perbedaan <code>=</code> dan <code>==</code>?</summary><div><p><code>=</code> mengisi nilai ke variabel, <code>==</code> membandingkan dua nilai dan menghasilkan 1 (benar) atau 0 (salah).</p></div></details>
+      <details class="reveal"><summary>3. Tulis perulangan for yang menampilkan angka 10 sampai 1.</summary><div><div class="snippet" data-code="for (int i = 10; i >= 1; i--) {
+    printf(&quot;%d\n&quot;, i);
+}" data-name="jawaban"></div></div></details>
+      <details class="reveal"><summary>4. Gambarkan flowchart program penentu kelulusan (nilai ≥ 75 lulus).</summary><div><p>Mulai → input nilai (jajar genjang) → keputusan "nilai ≥ 75?" (belah ketupat) → Ya: tampilkan "Lulus" / Tidak: tampilkan "Tidak lulus" (jajar genjang) → Selesai (oval).</p></div></details>
+      <h3>Praktik (di HP)</h3>
+      <p>Buat program input tegangan dan resistansi, tampilkan arus, dan beri peringatan "Arus berlebih" jika arus &gt; 0,5 A.</p>
+      <div class="btn-row"><button class="btn btn-ghost small" type="button" data-open="sumatif-praktik">Kerjakan di compiler</button></div>
+    </section>
+
+    <section class="block" id="s-rubrik">
+      <h2>Sumatif 2: rubrik mini proyek (pertemuan 16)</h2>
+      <p class="small muted">Untuk guru: pilih skor tiap aspek, nilai akhir dihitung otomatis dengan rumus nilai akhir = jumlah (skor × bobot) / 4 × 100.</p>
+      <div class="panel">
+        <label class="field">Nama kelompok / siswa<input type="text" id="rub-name" placeholder="misal: Kelompok 3 · Sensor parkir" autocomplete="off"></label>
+        <div id="rubric"></div>
+        <div class="rubric-total"><span class="small muted">Nilai akhir</span><b class="tnum" id="rub-total">–</b><span class="small muted" id="rub-detail"></span></div>
+      </div>
+    </section>
+  </div>
+</section>
+
+<!-- ============================== REFERENSI ============================== -->
+<section class="view" id="v-referensi" data-title="Error & cheat sheet" hidden>
+  <div class="wrap">
+    <div class="chap-head">
+      <div class="eyebrow">Tips, troubleshooting, cheat sheet</div>
+      <h1>Error, tips, dan cheat sheet</h1>
+      <p class="lead">Kunci keberhasilan kelas berbasis HP adalah kode pendek, template siap salin, dan membiasakan siswa membaca pesan error.</p>
+    </div>
+
+    <section class="block">
+      <h2>Error yang paling sering</h2>
+      <input type="search" class="search" id="err-search" placeholder="Cari pesan error, misal: expected ';'" aria-label="Cari error">
+      <div class="tbl-wrap">
+        <table class="tbl" id="err-table">
+          <thead><tr><th>Pesan error / gejala</th><th>Penyebab umum</th><th>Solusi</th></tr></thead>
+          <tbody>
+            <tr><td><code>expected ';' before ...</code></td><td>Lupa titik koma</td><td>Tambahkan <code>;</code> di akhir baris sebelumnya</td></tr>
+            <tr><td><code>... was not declared in this scope</code> / <code>undeclared</code></td><td>Nama variabel salah ketik atau belum dibuat</td><td>Cek huruf besar-kecil, deklarasikan variabel dulu</td></tr>
+            <tr><td><code>expected '}' at end of input</code></td><td>Kurung kurawal tidak berpasangan</td><td>Hitung jumlah <code>{</code> dan <code>}</code></td></tr>
+            <tr><td>Hasil pembagian selalu bulat</td><td>Membagi dua <code>int</code></td><td>Pakai <code>float</code> atau tulis <code>5.0</code></td></tr>
+            <tr><td>Input scanf tidak masuk / <code>Segmentation fault</code></td><td>Lupa tanda <code>&amp;</code></td><td>Tulis <code>scanf("%d", &amp;x);</code></td></tr>
+            <tr><td><code>stray '\342' in program</code> / tanda kutip error di HP</td><td>Keyboard mengganti <code>"</code> menjadi kutip miring <code>“ ”</code></td><td>Matikan smart punctuation / pakai keyboard koding</td></tr>
+            <tr><td><code>format '%d' expects argument of type 'int', but ... 'float'</code></td><td>Penentu format tidak cocok dengan tipe variabel</td><td><code>%d</code> untuk int, <code>%f</code> untuk float, <code>%c</code> untuk char</td></tr>
+            <tr><td><code>suggest parentheses around assignment used as truth value</code></td><td>Menulis <code>if (x = 5)</code></td><td>Untuk membandingkan gunakan <code>==</code></td></tr>
+            <tr><td>Program tidak berhenti / HP panas</td><td>Infinite loop: syarat while/for tidak pernah salah</td><td>Pastikan variabel di syarat berubah di dalam perulangan</td></tr>
+            <tr><td>LED tidak menyala di simulator</td><td>LED terbalik atau lupa <code>pinMode</code></td><td>Kaki panjang (anoda) ke pin, cek <code>pinMode(pin, OUTPUT)</code></td></tr>
+            <tr><td>Serial Monitor kosong</td><td>Lupa <code>Serial.begin(9600)</code></td><td>Tambahkan di <code>setup()</code></td></tr>
+            <tr><td>Nilai tombol berubah-ubah sendiri</td><td>Pin mengambang (tanpa pull-up)</td><td>Gunakan <code>pinMode(pin, INPUT_PULLUP)</code></td></tr>
+            <tr><td>Simulator lambat atau macet</td><td>HP kekurangan RAM</td><td>Tutup aplikasi lain, kurangi jumlah komponen</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small muted" id="err-empty" hidden>Tidak ada yang cocok. Coba kata kunci lain.</p>
+    </section>
+
+    <section class="block">
+      <h2>Cheat sheet C/C++ dan Arduino</h2>
+      <div class="seg" id="cheat-filter" role="tablist" aria-label="Saring"><button type="button" class="on" data-k="all">Semua</button><button type="button" data-k="c">C</button><button type="button" data-k="cpp">C++</button><button type="button" data-k="ard">Arduino</button></div>
+      <div class="panel" id="cheat" style="padding:4px 6px"></div>
+    </section>
+
+    <section class="block">
+      <h2>Tips untuk guru</h2>
+      <ul class="list">
+        <li>Tampilkan layar HP guru ke proyektor dengan screen mirroring atau kabel HDMI/OTG; bila tidak ada proyektor, tulis kode di papan tulis.</li>
+        <li>Terapkan pola "lihat, tiru, ubah, buat": siswa tidak langsung menulis dari nol.</li>
+        <li>Bagikan template kode di grup kelas agar waktu tidak habis untuk mengetik. Tombol <b>Salin</b> di setiap contoh web ini membantu.</li>
+        <li>Rayakan error: tunjukkan bahwa programmer profesional juga sering salah, yang penting tahu cara membaca pesan error.</li>
+        <li>Hubungkan setiap materi dengan kompetensi elektronika yang sudah dipelajari (hukum Ohm, kode warna resistor, LED).</li>
+        <li>Bila sekolah memiliki satu board Arduino fisik, lakukan demo upload dari HP Android lewat kabel OTG agar siswa melihat hasil nyata.</li>
+      </ul>
+    </section>
+
+    <section class="block">
+      <h2>Sumber belajar lanjutan</h2>
+      <ul class="list">
+        <li><a href="https://docs.arduino.cc/language-reference/" target="_blank" rel="noopener">Dokumentasi resmi Arduino</a> untuk referensi perintah.</li>
+        <li><a href="https://wokwi.com/" target="_blank" rel="noopener">Wokwi</a> untuk contoh proyek siap simulasi.</li>
+        <li><a href="https://www.programiz.com/c-programming" target="_blank" rel="noopener">Programiz: belajar C</a> untuk latihan mandiri dari HP.</li>
+      </ul>
+    </section>
+  </div>
+</section>
+
+  </main>
+
+  <nav class="tabbar" aria-label="Navigasi cepat">
+    <a href="#bab1" data-tab="materi"><svg><use href="#i-book"/></svg>Materi</a>
+    <a href="#compiler" data-tab="compiler"><svg><use href="#i-term"/></svg>Compiler</a>
+    <a href="#simulator" data-tab="simulator"><svg><use href="#i-chip"/></svg>Simulator</a>
+    <a href="#asesmen" data-tab="asesmen"><svg><use href="#i-check"/></svg>Kuis</a>
+    <button type="button" id="tab-menu"><svg><use href="#i-menu"/></svg>Menu</button>
+  </nav>
+</div>
+
+<script src="assets/vendor/codemirror/codemirror.min.js"></script>
+<script src="assets/vendor/codemirror/clike.min.js"></script>
+<script src="assets/vendor/codemirror/matchbrackets.min.js"></script>
+<script src="assets/vendor/codemirror/closebrackets.min.js"></script>
+<script src="assets/vendor/codemirror/runmode.min.js"></script>
+<script src="assets/minic.js?v=7"></script>
+<script src="assets/sim.js?v=7"></script>
+<script src="assets/examples.js?v=7"></script>
+<script src="assets/app.js?v=7"></script>
+</body>
+</html>

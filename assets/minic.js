@@ -2628,7 +2628,7 @@
       } catch (e) { fail(e); return; }
       cpu += performance.now() - t0;
       if (opt.mode !== 'arduino' && cpu > (opt.maxCpuMs || 15000)) {
-        fail(new RuntimeError(`Program dihentikan: berjalan lebih dari ${Math.round((opt.maxCpuMs || 15000) / 1000)} detik tanpa menunggu input.`,'Kemungkinan ada perulangan tanpa akhir (infinite loop). Periksa kondisi for/while: apakah suatu saat bernilai salah?'));
+        fail(new RuntimeError(`Program dihentikan: berjalan lebih dari ${Math.round((opt.maxCpuMs || 15000) / 1000)} detik tanpa menunggu input.`,'Kemungkinan ada perulangan tanpa akhir yang tidak disengaja. Periksa syarat for/while: apakah nilainya suatu saat menjadi salah?'));
         return;
       }
       timer = setTimeout(tick, 0);

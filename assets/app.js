@@ -37,6 +37,55 @@
     else fallback();
   }
 
+  /* ============================== Simpan & buka file ============================== */
+  function fileName(raw, ext) {
+    let base = String(raw || '').trim().replace(/[\\/:*?"<>|]+/g, '-').replace(/\.(c|cpp|cc|cxx|ino|txt|h)$/i, '');
+    if (!base) base = ext === '.ino' ? 'proyek' : 'main';
+    return base + ext;
+  }
+  function saveFile(name, text) {
+    try {
+      const url = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      toast('Mengunduh ' + name);
+    } catch (e) {
+      toast('Unduhan gagal. Gunakan tombol Salin sebagai gantinya.');
+    }
+  }
+  // Proyek simulator disimpan sebagai satu file .ino: kode + konfigurasi komponen di komentar
+  // penutup, sehingga file yang sama tetap bisa dibuka di Arduino IDE atau Wokwi.
+  const CFG_RE = /\s*\/\*\s*=+\s*KONFIGURASI SIMULATOR[\s\S]*?=+\s*\*\/\s*$/;
+  const PART_KEYS = ['type', 'pin', 'trig', 'echo', 'color', 'value', 'wiring', 'reversed'];
+  const PART_TYPES = ['led', 'button', 'pot', 'ldr', 'ntc', 'buzzer', 'ultrasonic'];
+  function simExport(code, parts) {
+    const clean = code.replace(CFG_RE, '').replace(/\s+$/, '');
+    const cfg = JSON.stringify({ format: 'modul-embedded-sim', versi: 1, komponen: parts });
+    return `${clean}\n\n/* ===== KONFIGURASI SIMULATOR (jangan dihapus) =====\n   Berisi daftar komponen dan pinnya. Buka kembali lewat\n   Simulator Arduino > Buka file. Arduino IDE dan Wokwi\n   mengabaikan bagian ini karena berupa komentar.\n${cfg}\n================================================== */\n`;
+  }
+  function simImport(text) {
+    const line = text.split(/\r?\n/).find(l => l.trim().startsWith('{"format":"modul-embedded-sim"'));
+    let parts = null;
+    if (line) {
+      try {
+        const o = JSON.parse(line.trim());
+        if (Array.isArray(o.komponen)) {
+          parts = o.komponen.filter(c => c && PART_TYPES.includes(c.type)).map(c => {
+            const p = {};
+            PART_KEYS.forEach(k => { if (c[k] !== undefined) p[k] = c[k]; });
+            return p;
+          });
+        }
+      } catch (e) { parts = null; }
+    }
+    return { code: text.replace(/\r\n/g, '\n').replace(CFG_RE, '').replace(/\s+$/, '') + '\n', parts };
+  }
+
   /* ============================== Tema ============================== */
   const rootEl = document.documentElement;
   function applyTheme(t) {
@@ -64,6 +113,26 @@
   scrim.addEventListener('click', closeDrawer);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 
+  // Tab di dalam satu halaman (misalnya Asesmen): hanya satu panel yang tampil.
+  function showTab(panel) {
+    const view = panel.closest('.view');
+    $$('.tab-panel', view).forEach(p => { p.hidden = p !== panel; });
+    $$('[data-tab-for]', view).forEach(a => {
+      const on = a.dataset.tabFor === panel.id;
+      a.classList.toggle('on', on);
+      a.setAttribute('aria-selected', on ? 'true' : 'false');
+      if (on) setTimeout(() => { a.parentNode.scrollLeft = a.offsetLeft - a.parentNode.offsetLeft - 24; }, 0);
+    });
+    store.set('tab:' + view.id, panel.id);
+    panel.dispatchEvent(new CustomEvent('tabshow'));
+  }
+  function ensureTab(view) {
+    const panels = $$('.tab-panel', view);
+    if (!panels.length || panels.filter(p => !p.hidden).length === 1) return;
+    const saved = store.get('tab:' + view.id, null);
+    showTab(panels.find(p => p.id === saved) || panels[0]);
+  }
+
   function route() {
     let id = decodeURIComponent(location.hash.slice(1)) || 'beranda';
     let anchor = null;
@@ -72,7 +141,11 @@
       const v = el && el.closest('.view');
       if (v) { anchor = el; id = v.id.slice(2); } else id = 'beranda';
     }
-    if (current !== id) {
+    const viewChanged = current !== id;
+    const panel = anchor && anchor.closest('.tab-panel');
+    if (panel) showTab(panel);
+    else ensureTab($('#v-' + id));
+    if (viewChanged) {
       if (current && onHide[current]) onHide[current]();
       $$('.view').forEach(v => { v.hidden = v.id !== 'v-' + id; });
       current = id;
@@ -86,7 +159,13 @@
       if (onShow[id]) onShow[id]();
     }
     closeDrawer();
-    if (anchor) requestAnimationFrame(() => anchor.scrollIntoView({ block: 'start' }));
+    if (panel && anchor === panel) {
+      // Pindah tab: tetap di posisi bilah tab, kecuali datang dari halaman lain.
+      const head = $('.chap-head', $('#v-' + id));
+      const y = head.getBoundingClientRect().bottom + window.scrollY - 60;
+      if (viewChanged) window.scrollTo(0, 0);
+      else if (window.scrollY > y) window.scrollTo(0, y);
+    } else if (anchor) setTimeout(() => anchor.scrollIntoView({ block: 'start' }), 0);
     else window.scrollTo(0, 0);
   }
   window.addEventListener('hashchange', route);
@@ -95,41 +174,133 @@
   function go(id) { if (location.hash === '#' + id) route(); else location.hash = id; }
 
   /* ============================== Kemajuan & centang ============================== */
+  // Rencana 16 pertemuan. Setiap pertemuan memuat tujuan (TP), kegiatan, bukti kerja,
+  // kriteria keberhasilan, dan tindak lanjut bagi siswa yang membutuhkan bantuan.
   const MEET = [
-    [1, 1, 'Sistem embedded di sekitar kita, instal aplikasi', 'HP, kertas', 'Daftar 10 perangkat embedded di rumah'],
-    [2, 1, 'Algoritma dan flowchart', 'Kertas', 'Flowchart lampu lalu lintas'],
-    [3, 2, 'Program pertama, struktur program C, printf', 'Compiler', 'Program biodata'],
-    [4, 2, 'Variabel, tipe data, scanf', 'Compiler', 'Kalkulator luas persegi panjang'],
-    [5, 2, 'Operator aritmatika, perbandingan, logika', 'Compiler', 'Kalkulator hukum Ohm'],
-    [6, 3, 'Percabangan if, else, switch', 'Compiler', 'Program kode warna resistor sederhana'],
-    [7, 3, 'Perulangan for, while', 'Compiler', 'Tabel perkalian, hitung mundur'],
-    [8, 4, 'Fungsi', 'Compiler', 'Fungsi hitung daya listrik'],
-    [9, 4, 'Array dan pengenalan C++ (cout, cin)', 'Compiler', 'Rata-rata 5 data sensor'],
-    [10, 0, 'Asesmen tengah semester (tertulis + praktik)', 'HP, kertas', 'Nilai sumatif 1'],
-    [11, 5, 'Mengenal Arduino, setup() dan loop(), Blink', 'Simulator', 'LED berkedip'],
-    [12, 5, 'Output digital: lampu lalu lintas, running LED', 'Simulator', 'Lampu lalu lintas 3 LED'],
-    [13, 5, 'Input digital: tombol, if di Arduino', 'Simulator', 'LED nyala saat tombol ditekan'],
-    [14, 6, 'Serial Monitor, input analog (potensiometer, sensor)', 'Simulator', 'Tampilan nilai sensor'],
-    [15, 6, 'PWM: atur terang LED, buzzer', 'Simulator', 'LED redup-terang'],
-    [16, 6, 'Presentasi mini proyek', 'Simulator', 'Proyek dan presentasi']
+    { no: 1, bab: 1, tp: [1], alat: 'HP, kertas', topik: 'Sistem embedded di sekitar kita, instal aplikasi',
+      tujuan: 'Menjelaskan pengertian sistem embedded dan menguraikan input, proses, dan output pada perangkat di sekitar.',
+      kegiatan: 'Asesmen diagnostik; diskusi contoh perangkat; widget "Bongkar alat" dan rice cooker; mencoba Hello World di compiler.',
+      bukti: 'Daftar 10 perangkat embedded di rumah dan tabel input-proses-output untuk 3 perangkat.',
+      kriteria: 'Minimal 8 dari 10 perangkat tepat; ketiga tabel IPO menempatkan sensor/tombol sebagai input dan aksi sebagai output.',
+      lanjut: 'Mengisi tabel IPO bersama pasangan memakai widget rice cooker sebagai contoh; siswa yang belum bisa memasang aplikasi memakai compiler di web ini.' },
+    { no: 2, bab: 1, tp: [2], alat: 'Kertas', topik: 'Algoritma, flowchart, dan program kendali',
+      tujuan: 'Menyusun algoritma dan flowchart, serta membedakan algoritma satu tugas dengan program kendali yang berulang.',
+      kegiatan: 'Latihan "Susun algoritmanya"; mengamati flowchart bergerak; menggambar flowchart lampu lalu lintas dan pompa air otomatis.',
+      bukti: 'Foto flowchart lampu lalu lintas (merah 5 detik → hijau 5 detik → kuning 2 detik) dan flowchart pompa air otomatis.',
+      kriteria: 'Simbol tepat; urutan dan durasi benar; program kendali memiliki panah kembali dan tidak memakai simbol Selesai.',
+      lanjut: 'Mengulang latihan susun algoritma (mulai dari mi instan); guru memberi kerangka flowchart yang tinggal dilengkapi.' },
+    { no: 3, bab: 2, tp: [3], alat: 'Compiler', topik: 'Program pertama, struktur program C, printf',
+      tujuan: 'Menulis, menjalankan, dan memperbaiki program C sederhana dengan printf.',
+      kegiatan: 'Membaca program pertama baris demi baris; Latihan 2.1 biodata; sengaja menghapus titik koma untuk membaca pesan error.',
+      bukti: 'Program biodata 3 baris (screenshot atau file .c).',
+      kriteria: 'Program berjalan tanpa error, setiap data tampil di baris sendiri, dan siswa bisa menunjukkan letak error "expected \';\'".',
+      lanjut: 'Memakai template biodata; mengerjakan Cari kesalahan nomor 1 di halaman Asesmen.' },
+    { no: 4, bab: 2, tp: [4], alat: 'Compiler', topik: 'Variabel, tipe data, scanf',
+      tujuan: 'Memilih tipe data yang tepat dan membaca input dengan scanf.',
+      kegiatan: 'Widget pembuat variabel; contoh arus dan luas PCB; membuat kalkulator luas persegi panjang.',
+      bukti: 'Program kalkulator luas persegi panjang dengan input panjang dan lebar.',
+      kriteria: 'Memakai float untuk ukuran desimal; scanf memakai tanda & dan format %f; hasil benar untuk 2 data uji.',
+      lanjut: 'Mengerjakan Cari kesalahan nomor 2 (lupa &); membandingkan %d dan %f bersama pasangan.' },
+    { no: 5, bab: 2, tp: [4], alat: 'Compiler', topik: 'Operator, pembagian int/desimal, hukum Ohm',
+      tujuan: 'Menggunakan operator aritmatika, perbandingan, dan logika, serta menjelaskan pengaruh tipe operand pada hasil pembagian.',
+      kegiatan: 'Lab operator; contoh "Tipe operand menentukan hasil bagi"; Tugas Bab 2 (hukum Ohm, resistor seri, resistor LED dengan konversi mA ke A).',
+      bukti: 'Program kalkulator hukum Ohm dan program resistor LED.',
+      kriteria: 'Hasil hukum Ohm benar; resistor LED untuk 5 V, 2 V, 20 mA = 150 Ω; bisa menjelaskan mengapa float x = 10 / 4 bernilai 2.0.',
+      lanjut: 'Mengerjakan Tebak output nomor 1 dan 5; menghitung konversi satuan di kertas sebelum menulis kode.' },
+    { no: 6, bab: 3, tp: [5], alat: 'Compiler', topik: 'Percabangan if, else, switch',
+      tujuan: 'Menerapkan percabangan if/else if/else dan switch.',
+      kegiatan: 'Widget suhu dan kipas; widget pita resistor dan break; tugas status baterai dan lampu lalu lintas dengan switch.',
+      bukti: 'Program status baterai dan program lampu lalu lintas (switch).',
+      kriteria: 'Batas 80 dan 30 tepat saat diuji dengan 80, 79, 30, dan 29; setiap case diakhiri break.',
+      lanjut: 'Mengerjakan Tebak output nomor 3 (break) dan Cari kesalahan nomor 3 (= dan ==).' },
+    { no: 7, bab: 3, tp: [5], alat: 'Compiler', topik: 'Perulangan for dan while',
+      tujuan: 'Menerapkan perulangan for dan while, serta membedakan perulangan tanpa akhir yang disengaja dan yang tidak disengaja.',
+      kegiatan: 'Widget for langkah demi langkah; mode Langkah pada contoh while; tugas tabel arus dan password.',
+      bukti: 'Program tabel arus (100 sampai 1000 Ω) dan program password.',
+      kriteria: 'Tabel berisi 10 baris dengan nilai benar; program password berhenti saat 1234; tidak ada perulangan yang tidak sengaja berjalan terus.',
+      lanjut: 'Menelusuri Tebak output nomor 2 dan 4 dengan tabel jejak variabel di kertas.' },
+    { no: 8, bab: 4, tp: [6], alat: 'Compiler', topik: 'Fungsi',
+      tujuan: 'Membuat dan memanggil fungsi dengan parameter dan nilai kembali.',
+      kegiatan: 'Widget mesin fungsi hitungDaya; contoh fungsi; tugas fungsi hitungRLED (arus dalam mA).',
+      bukti: 'Fungsi hitungDaya dan hitungRLED beserta pemanggilannya.',
+      kriteria: 'hitungRLED(5, 2, 20) menghasilkan 150; fungsi dipanggil minimal dua kali dengan nilai berbeda.',
+      lanjut: 'Memulai dari template; membandingkan susunan fungsi dengan contoh hitungDaya.' },
+    { no: 9, bab: 4, tp: [6], alat: 'Compiler', topik: 'Array (C++ cout/cin menjadi pengayaan)',
+      tujuan: 'Menyimpan dan mengolah data sensor dengan array.',
+      kegiatan: 'Widget array suhu; contoh rata-rata; tugas tegangan tertinggi dan terendah. Siswa yang selesai lebih cepat mengerjakan pengayaan C++ (4.3).',
+      bukti: 'Program rata-rata 5 data dan program tertinggi/terendah 6 data.',
+      kriteria: 'Indeks dipakai dari 0 sampai n-1 tanpa keluar batas; rata-rata, nilai tertinggi, dan terendah benar.',
+      lanjut: 'Menggambar kotak array dan indeksnya di kertas sebelum menulis perulangan.' },
+    { no: 10, bab: 0, tp: [1, 2, 3, 4, 5, 6], alat: 'HP, kertas', topik: 'Asesmen tengah semester (tertulis + praktik)',
+      tujuan: 'Mengukur ketercapaian TP 1 sampai 6.',
+      kegiatan: 'Tes tertulis (soal sumatif 1) dan praktik: program arus dengan peringatan "Arus berlebih".',
+      bukti: 'Lembar jawaban tertulis dan program praktik.',
+      kriteria: 'Mencapai KKTP sekolah; program praktik benar untuk arus ≤ 0,5 A dan > 0,5 A.',
+      lanjut: 'Remedial per TP yang belum tercapai memakai kuis, Tebak output, dan Cari kesalahan; pengayaan bagi yang sudah tuntas.' },
+    { no: 11, bab: 5, tp: [7, 8], alat: 'Simulator', topik: 'Arduino Uno, setup() dan loop(), Blink, lampu lalu lintas',
+      tujuan: 'Menjelaskan peran setup() dan loop() serta mengendalikan output digital.',
+      kegiatan: 'Mengenal pin Uno; animasi setup/loop; Praktik 1 Blink dan SOS; Praktik 2 lampu lalu lintas; melihat daftar mini proyek.',
+      bukti: 'Sketch Blink/SOS dan lampu lalu lintas 3 LED.',
+      kriteria: 'pinMode ditulis di setup(); urutan merah 5 detik → hijau 5 detik → kuning 2 detik benar; pin di kode sama dengan pin komponen.',
+      lanjut: 'Membandingkan sketch dengan flowchart pertemuan 2; guru memeriksa pemetaan pin bersama siswa.' },
+    { no: 12, bab: 5, tp: [7, 8], alat: 'Simulator', topik: 'Tombol (INPUT_PULLUP), Serial Monitor, memilih proyek',
+      tujuan: 'Membaca input digital dengan INPUT_PULLUP dan menampilkan data ke Serial Monitor.',
+      kegiatan: 'Praktik 3 tombol dan tantangan toggle; contoh Serial Monitor (6.1); membentuk pasangan dan memilih mini proyek.',
+      bukti: 'Sketch tombol atau toggle; nama pasangan dan proyek yang dipilih.',
+      kriteria: 'LED berubah sesuai tombol; Serial.begin(9600) ada di setup(); setiap pasangan sudah memilih proyek.',
+      lanjut: 'Mencoba mengganti INPUT_PULLUP dengan INPUT untuk melihat pin mengambang; guru membantu memilih proyek sesuai kemampuan.' },
+    { no: 13, bab: 6, tp: [7, 8], alat: 'Simulator, kertas', topik: 'Input analog, PWM, flowchart proyek',
+      tujuan: 'Membaca sensor analog, mengubah rentang dengan map(), mengatur terang LED dengan PWM, dan merancang proyek.',
+      kegiatan: 'Widget ADC dan PWM; contoh potensiometer dan dimmer; menyusun flowchart dan tabel pemetaan pin proyek.',
+      bukti: 'Sketch potensiometer/dimmer; flowchart proyek dan tabel pemetaan pin (komponen → pin).',
+      kriteria: 'Nilai 0-1023 terbaca di Serial Monitor; terang LED berubah; flowchart lengkap; pin PWM dan analog dipilih dengan tepat.',
+      lanjut: 'Guru meninjau flowchart setiap pasangan sebelum pertemuan 14; pasangan yang tertinggal memakai kerangka proyek.' },
+    { no: 14, bab: 6, tp: [8], alat: 'Simulator', topik: 'Pengerjaan proyek: rangkaian dan kode versi 1',
+      tujuan: 'Memasang komponen sesuai tabel pin dan menulis kode proyek dari flowchart.',
+      kegiatan: 'Memasang komponen di simulator; menulis kode; menguji per bagian (input dulu, lalu output); menyimpan dengan Unduh proyek.',
+      bukti: 'File proyek .ino versi 1 (berisi kode dan konfigurasi komponen).',
+      kriteria: 'Komponen terpasang sesuai tabel pin; minimal satu bagian (input atau output) sudah berfungsi.',
+      lanjut: 'Memakai Serial Monitor untuk mencari letak kesalahan; guru memberi petunjuk per pasangan.' },
+    { no: 15, bab: 6, tp: [8], alat: 'Simulator', topik: 'Pengujian, perbaikan, dan laporan',
+      tujuan: 'Menguji proyek dengan berbagai kondisi, memperbaiki bug, dan menyusun laporan.',
+      kegiatan: 'Membuat tabel uji (kondisi input → hasil yang diharapkan → hasil sebenarnya); memperbaiki program; menyusun laporan.',
+      bukti: 'Tabel uji, file proyek final, dan draf laporan.',
+      kriteria: 'Semua baris tabel uji sesuai harapan; laporan memuat judul, flowchart, tabel pin, gambar rangkaian, kode, dan cara kerja.',
+      lanjut: 'Pasangan yang belum selesai memprioritaskan fungsi utama; fitur tambahan menjadi pengayaan.' },
+    { no: 16, bab: 6, tp: [8], alat: 'Simulator', topik: 'Presentasi mini proyek',
+      tujuan: 'Mempresentasikan proyek dan menjelaskan sambungan serta kodenya.',
+      kegiatan: 'Demo proyek, penjelasan sambungan dan kode, tanya jawab; penilaian dengan rubrik sumatif 2.',
+      bukti: 'Presentasi, file proyek, dan laporan.',
+      kriteria: 'Nilai rubrik mencapai KKTP sekolah.',
+      lanjut: 'Perbaikan proyek dan presentasi ulang singkat bagi yang belum mencapai kriteria; refleksi kelas.' }
   ];
-  const BAB_NAME = { 0: 'Asesmen tengah semester', 1: 'Bab 1 · Sistem embedded', 2: 'Bab 2 · Dasar bahasa C', 3: 'Bab 3 · Percabangan & perulangan', 4: 'Bab 4 · Fungsi, array, C++', 5: 'Bab 5 · Arduino di simulator', 6: 'Bab 6 · Serial, analog, PWM' };
+  const BAB_NAME = { 0: 'Asesmen tengah semester', 1: 'Bab 1 · Sistem embedded', 2: 'Bab 2 · Dasar bahasa C', 3: 'Bab 3 · Percabangan & perulangan', 4: 'Bab 4 · Fungsi & array', 5: 'Bab 5 · Arduino di simulator', 6: 'Bab 6 · Sensor, PWM, proyek' };
   function updateProgress() {
-    const done = MEET.filter(m => store.get('meet' + m[0], false)).length;
+    const done = MEET.filter(m => store.get('meet' + m.no, false)).length;
     $('#prog-text').textContent = `${done}/16`;
     $('#prog-bar').style.width = (done / 16 * 100) + '%';
   }
   function renderMeetings() {
     const box = $('#meet-list');
     let html = '', lastBab = -1;
-    MEET.forEach(([no, bab, topik, alat, hasil]) => {
-      if (bab !== lastBab) {
+    MEET.forEach(m => {
+      if (m.bab !== lastBab) {
         if (lastBab !== -1) html += '</div>';
-        html += `<div class="meet-group"><h3>${bab ? `<span class="rbar b${bab}"></span>` : ''}${bab ? `<a href="#bab${bab}">${esc(BAB_NAME[bab])}</a>` : esc(BAB_NAME[0])}</h3>`;
-        lastBab = bab;
+        html += `<div class="meet-group"><h3>${m.bab ? `<span class="rbar b${m.bab}"></span><a href="#bab${m.bab}">${esc(BAB_NAME[m.bab])}</a>` : esc(BAB_NAME[0])}</h3>`;
+        lastBab = m.bab;
       }
-      const on = store.get('meet' + no, false);
-      html += `<label class="meet${on ? ' done' : ''}"><input type="checkbox" data-meet="${no}"${on ? ' checked' : ''}><span class="no">${no}</span><span class="t">${esc(topik)}</span><span class="d"><span>Alat: ${esc(alat)}</span><span>Hasil: ${esc(hasil)}</span></span></label>`;
+      const on = store.get('meet' + m.no, false);
+      const tp = m.tp.length > 2 ? `TP ${m.tp[0]}-${m.tp[m.tp.length - 1]}` : 'TP ' + m.tp.join(', ');
+      html += `<div class="meet${on ? ' done' : ''}">
+        <label class="meet-row"><input type="checkbox" data-meet="${m.no}"${on ? ' checked' : ''} aria-label="Pertemuan ${m.no} selesai"><span class="no">${m.no}</span><span class="t">${esc(m.topik)}</span></label>
+        <div class="d"><span class="tag">${tp}</span><span>Alat: ${esc(m.alat)}</span></div>
+        <details class="meet-more"><summary>Rincian pertemuan</summary><dl class="meet-dl">
+          <dt>Tujuan</dt><dd>${esc(m.tujuan)}</dd>
+          <dt>Kegiatan</dt><dd>${esc(m.kegiatan)}</dd>
+          <dt>Bukti kerja</dt><dd>${esc(m.bukti)}</dd>
+          <dt>Kriteria keberhasilan</dt><dd>${esc(m.kriteria)}</dd>
+          <dt>Tindak lanjut</dt><dd>${esc(m.lanjut)}</dd>
+        </dl></details></div>`;
     });
     box.innerHTML = html + '</div>';
     $$('input[data-meet]', box).forEach(cb => cb.addEventListener('change', () => {
@@ -315,6 +486,8 @@
       inp.setAttribute('aria-label', 'Input program');
       inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); this.submit(); } });
       inp.addEventListener('input', () => { inp.style.width = Math.max(12, inp.value.length + 2) + 'ch'; });
+      // Di HP, keyboard yang muncul bisa menutupi baris input; geser agar tetap terlihat.
+      inp.addEventListener('focus', () => setTimeout(() => inp.scrollIntoView({ block: 'center' }), 300));
       this.out.appendChild(inp);
       this.inputEl = inp;
       this.askCb = cb;
@@ -511,6 +684,29 @@
       $('#cc-step').addEventListener('click', () => this.run(true));
       $('#cc-stop').addEventListener('click', () => this.stop());
       $('#cc-copy').addEventListener('click', () => copyText(this.ed.get()));
+      const fn = $('#cc-fname');
+      const ext = () => (this.lang === 'c' ? '.c' : '.cpp');
+      fn.value = store.get('cc-fname', 'main.c');
+      fn.addEventListener('change', () => { fn.value = fileName(fn.value, ext()); store.set('cc-fname', fn.value); });
+      $('#cc-save').addEventListener('click', () => {
+        fn.value = fileName(fn.value, ext());
+        store.set('cc-fname', fn.value);
+        saveFile(fn.value, this.ed.get());
+      });
+      $('#cc-open').addEventListener('click', () => $('#cc-file').click());
+      $('#cc-file').addEventListener('change', async e => {
+        const f = e.target.files[0];
+        e.target.value = '';
+        if (!f) return;
+        const text = await f.text();
+        const lower = f.name.toLowerCase();
+        if (lower.endsWith('.ino')) { Sim.importText(text, f.name); return; }
+        const lang = /\.(cpp|cc|cxx|hpp)$/.test(lower) ? 'cpp' : /\.(c|h)$/.test(lower) ? 'c' : this.lang;
+        this.loadCode(text.replace(/\r\n/g, '\n'), lang);
+        fn.value = fileName(f.name, ext());
+        store.set('cc-fname', fn.value);
+        toast(f.name + ' dibuka');
+      });
       $('#cc-clear').addEventListener('click', () => {
         this.ed.set(this.lang === 'c' ? '#include <stdio.h>\n\nint main() {\n    \n    return 0;\n}\n' : '#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}\n');
         store.set('cc-code-' + this.lang, this.ed.get());
@@ -541,7 +737,9 @@
       this.lang = l;
       store.set('cc-lang', l);
       $$('#cc-lang button').forEach(b => b.classList.toggle('on', b.dataset.lang === l));
-      $('#cc-fname').textContent = l === 'c' ? 'main.c' : 'main.cpp';
+      const fn = $('#cc-fname');
+      fn.value = fileName(fn.value, l === 'c' ? '.c' : '.cpp');
+      store.set('cc-fname', fn.value);
       this.ed.setMode(mimeOf(l));
     },
     load(id) { this.loadCode(EX[id].code, EX[id].lang || 'c'); },
@@ -698,6 +896,21 @@
       $('#sim-run').addEventListener('click', () => this.run());
       $('#sim-stop').addEventListener('click', () => this.stop());
       $('#sim-copy').addEventListener('click', () => copyText(this.ed.get()));
+      const fn = $('#sim-fname');
+      fn.value = store.get('sim-fname', 'proyek.ino');
+      fn.addEventListener('change', () => { fn.value = fileName(fn.value, '.ino'); store.set('sim-fname', fn.value); });
+      $('#sim-save').addEventListener('click', () => {
+        fn.value = fileName(fn.value, '.ino');
+        store.set('sim-fname', fn.value);
+        this.saveParts();
+        saveFile(fn.value, simExport(this.ed.get(), store.get('sim-parts', [])));
+      });
+      $('#sim-open').addEventListener('click', () => $('#sim-file').click());
+      $('#sim-file').addEventListener('change', async e => {
+        const f = e.target.files[0];
+        e.target.value = '';
+        if (f) this.importText(await f.text(), f.name);
+      });
       $$('#sim-add [data-add]').forEach(b => b.addEventListener('click', () => { this.sim.addPart(b.dataset.add); this.saveParts(); toast(b.textContent.trim() + ' ditambahkan'); }));
       $('#sim-parts').addEventListener('change', () => this.saveParts());
       $('#sim-parts').addEventListener('click', e => { if (e.target.closest('.part-rm')) setTimeout(() => this.saveParts(), 0); });
@@ -728,8 +941,26 @@
       store.set('sim-code', code);
       this.sim.setComponents(ex.parts || []);
       this.saveParts();
+      $('#sim-fname').value = id.replace(/^(ard|proj)-/, '') + '.ino';
+      store.set('sim-fname', $('#sim-fname').value);
       $('#sim-diags').innerHTML = '';
       this.ed.clearMarks();
+    },
+    importText(text, name) {
+      this.init();
+      this.stop();
+      const r = simImport(text);
+      this.ed.set(r.code);
+      store.set('sim-code', r.code);
+      if (r.parts) { this.sim.setComponents(r.parts); this.saveParts(); }
+      $('#sim-fname').value = fileName(name, '.ino');
+      store.set('sim-fname', $('#sim-fname').value);
+      $('#sim-diags').innerHTML = '';
+      this.ed.clearMarks();
+      go('simulator');
+      this.pane('code');
+      setTimeout(() => this.ed.refresh(), 30);
+      toast(r.parts ? `${name} dibuka: kode dan ${r.parts.length} komponen` : `${name} dibuka. File ini tidak berisi konfigurasi komponen, jadi komponen yang sekarang tetap dipakai.`);
     },
     open(id, variant) {
       this.init();
@@ -804,7 +1035,7 @@
     'Rice cooker': { i: ['Sensor suhu', 'Tombol Cook'], p: 'Jika suhu > 103°C, pindah ke mode hangat.', o: ['Mematikan pemanas', 'Menyalakan lampu Warm'] },
     'Dispenser': { i: ['Sensor suhu air', 'Tombol pemanas'], p: 'Jika air belum cukup panas, nyalakan pemanas; jika sudah, matikan.', o: ['Elemen pemanas', 'Lampu indikator'] },
     'Mesin cuci': { i: ['Tombol program', 'Sensor level air', 'Sensor pintu'], p: 'Isi air sampai level, putar motor sesuai waktu, buang air, lalu peras.', o: ['Katup air', 'Motor', 'Pompa buang', 'Layar sisa waktu'] },
-    'Lampu lalu lintas': { i: ['Pewaktu (timer) internal', 'Tombol penyeberang (bila ada)'], p: 'Merah 5 detik, kuning 2 detik, hijau 5 detik, ulangi.', o: ['Lampu merah, kuning, hijau'] },
+    'Lampu lalu lintas': { i: ['Pewaktu (timer) internal', 'Tombol penyeberang (bila ada)'], p: 'Merah 5 detik, hijau 5 detik, kuning 2 detik, lalu kembali ke merah.', o: ['Lampu merah, kuning, hijau'] },
     'Remote TV': { i: ['Tombol-tombol'], p: 'Ubah tombol yang ditekan menjadi kode perintah.', o: ['LED inframerah memancarkan kode'] },
     'Pompa air otomatis': { i: ['Sensor level / pelampung tandon'], p: 'Jika tandon kosong, nyalakan pompa; jika penuh, matikan.', o: ['Relay pompa air'] }
   };
@@ -870,9 +1101,9 @@
 
   (function order() {
     const SETS = {
-      kamar: { label: 'Lampu kamar otomatis', prompt: 'Urutkan algoritma lampu kamar otomatis dari langkah pertama.', steps: ['Mulai.', 'Baca sensor cahaya.', 'Jika ruangan gelap, nyalakan lampu.', 'Jika ruangan terang, matikan lampu.', 'Ulangi ke langkah 2.'] },
-      tl: { label: 'Lampu lalu lintas', prompt: 'Urutkan algoritma lampu lalu lintas (merah 5 detik, kuning 2 detik, hijau 5 detik).', steps: ['Mulai.', 'Nyalakan lampu merah, tunggu 5 detik.', 'Matikan merah, nyalakan kuning, tunggu 2 detik.', 'Matikan kuning, nyalakan hijau, tunggu 5 detik.', 'Matikan hijau, ulangi ke langkah 2.'] },
-      mi: { label: 'Membuat mi instan', prompt: 'Soal asesmen diagnostik: urutkan langkah membuat mi instan rebus.', steps: ['Isi panci dengan air.', 'Rebus air sampai mendidih.', 'Masukkan mi, masak sekitar 3 menit.', 'Tuang mi dan kuahnya ke mangkuk.', 'Campurkan bumbu, aduk rata.', 'Sajikan.'] }
+      kamar: { label: 'Lampu kamar otomatis', prompt: 'Program kendali (berulang): urutkan langkah lampu kamar otomatis dari langkah pertama.', steps: ['Mulai.', 'Baca sensor cahaya.', 'Jika ruangan gelap, nyalakan lampu.', 'Jika ruangan terang, matikan lampu.', 'Ulangi ke langkah 2.'] },
+      tl: { label: 'Lampu lalu lintas', prompt: 'Program kendali (berulang): urutkan langkah lampu lalu lintas (merah 5 detik, hijau 5 detik, kuning 2 detik).', steps: ['Mulai.', 'Nyalakan lampu merah, tunggu 5 detik.', 'Matikan merah, nyalakan hijau, tunggu 5 detik.', 'Matikan hijau, nyalakan kuning, tunggu 2 detik.', 'Matikan kuning, ulangi ke langkah 2.'] },
+      mi: { label: 'Membuat mi instan', prompt: 'Algoritma satu tugas (soal asesmen diagnostik): urutkan langkah membuat mi instan rebus.', steps: ['Isi panci dengan air.', 'Rebus air sampai mendidih.', 'Masukkan mi, masak sekitar 3 menit.', 'Tuang mi dan kuahnya ke mangkuk.', 'Campurkan bumbu, aduk rata.', 'Sajikan.'] }
     };
     const tabs = $('#order-tabs'), pool = $('#order-pool'), picked = $('#order-picked'), verdict = $('#order-verdict');
     let key = 'kamar', left = [], chosen = [];
@@ -900,7 +1131,7 @@
       const ok = chosen.every((v, i) => v === i);
       picked.className = 'order-picked ' + (ok ? 'ok' : 'bad');
       $$('button', picked).forEach((b, i) => b.classList.toggle('wrong', chosen[i] !== i));
-      verdict.textContent = ok ? 'Tepat! Algoritmanya jelas, berurutan, dan punya akhir (atau sengaja diulang).' : 'Belum tepat. Langkah berwarna merah masih salah posisi; ketuk untuk mengembalikannya.';
+      verdict.textContent = ok ? (key === 'mi' ? 'Tepat! Algoritma satu tugas ini jelas, berurutan, dan selesai di langkah terakhir.' : 'Tepat! Setiap putaran jelas dan selesai, lalu putaran itu diulang selama perangkat menyala.') : 'Belum tepat. Langkah berwarna merah masih salah posisi; ketuk untuk mengembalikannya.';
       verdict.className = 'verdict ' + (ok ? 'ok' : 'bad');
     });
     $('#order-reset').addEventListener('click', reset);
@@ -916,7 +1147,7 @@
 
   (function flow() {
     let which = 'tl', speed = 1, gelap = 1, timer = null, running = false, idx = 0;
-    const TL = [['tl-start', 700, null], ['tl-red', 5000, 'r'], ['tl-yellow', 2000, 'y'], ['tl-green', 5000, 'g']];
+    const TL = [['tl-start', 700, null], ['tl-red', 5000, 'r'], ['tl-green', 5000, 'g'], ['tl-yellow', 2000, 'y']];
     const LAMP = { r: '#ff3b30', y: '#ffd60a', g: '#30d158' };
     const lamps = { r: $('#lamp-r'), y: $('#lamp-y'), g: $('#lamp-g') };
     const clear = () => { $$('#w-flow .fl-shape').forEach(s => s.classList.remove('on')); Object.values(lamps).forEach(l => l.style.fill = ''); };
@@ -1004,7 +1235,7 @@
       rows.push(['a - b', f(a - b), '']);
       rows.push(['a * b', f(a * b), '']);
       if (b === 0) rows.push(['a / b', 'error', type === 'int' ? 'Floating point exception: pembagian int dengan nol membuat program berhenti.' : 'Hasilnya inf (tak hingga).']);
-      else if (type === 'int') rows.push(['a / b', String(Math.trunc(a / b)), a % b !== 0 ? `Desimalnya dibuang (aslinya ${fmtG(a / b)}).` : '']);
+      else if (type === 'int') rows.push(['a / b', String(Math.trunc(a / b)), a % b !== 0 ? `Kedua operand int, jadi desimalnya dibuang (aslinya ${fmtG(a / b)}). Disimpan ke float x pun hasilnya tetap ${Math.trunc(a / b)}.0.` : 'Kedua operand int: pembagian bilangan bulat.']);
       else rows.push(['a / b', fmtG(a / b), '']);
       if (type === 'int') rows.push(['a % b', b === 0 ? 'error' : String(a % b), 'Sisa bagi.']);
       else rows.push(['a % b', 'error', 'invalid operands to binary %: operator % hanya untuk int.']);
@@ -1139,7 +1370,7 @@
     const info = p => {
       if (p >= 14) return `<b>A${p - 14}</b>: input analog. analogRead(A${p - 14}) mengubah tegangan 0-5 V menjadi angka 0-1023 (ADC 10 bit). Bisa juga dipakai sebagai pin digital nomor ${p}.`;
       let s = `<b>Pin ${p}</b>: input/output digital, dipakai dengan pinMode, digitalWrite, dan digitalRead.`;
-      if (PWM.includes(p)) s += ' Bertanda ~ sehingga bisa PWM: analogWrite(pin, 0-255).';
+      if (PWM.includes(p)) s += ` Bertanda ~ sehingga bisa PWM, misalnya analogWrite(${p}, 128). Nilainya 0 sampai 255.`;
       if (p === 13) s += ' Terhubung ke LED bawaan "L" di papan.';
       if (p <= 1) s += ` Juga jalur Serial (${p === 0 ? 'RX, menerima' : 'TX, mengirim'}); hindari untuk LED atau tombol saat memakai Serial Monitor.`;
       return s;
@@ -1259,8 +1490,8 @@
 
   /* ============================== Asesmen ============================== */
   const QUIZ = [
-    { q: 'Apa perbedaan utama sistem embedded dengan komputer biasa?', o: ['Sistem embedded lebih mahal', 'Sistem embedded mengerjakan satu tugas khusus terus-menerus', 'Sistem embedded tidak punya program', 'Sistem embedded selalu memakai layar'], a: 1, e: 'Sistem embedded dirancang untuk satu tugas khusus dan bekerja terus-menerus, misalnya rice cooker atau lampu lalu lintas.' },
-    { q: 'Chip yang menjadi "otak" sistem embedded disebut…', o: ['Resistor', 'Mikrokontroler', 'Transformator', 'Kapasitor'], a: 1, e: 'Mikrokontroler berisi prosesor, memori, dan pin input/output dalam satu chip.' },
+    { q: 'Pernyataan yang paling tepat tentang sistem embedded adalah…', o: ['Sistem embedded selalu lebih mahal dari komputer', 'Sistem embedded adalah sistem komputasi yang dirancang untuk menjalankan fungsi khusus di dalam suatu perangkat', 'Sistem embedded tidak memerlukan program', 'Sistem embedded selalu memakai layar'], a: 1, e: 'Komputer biasa serbaguna; sistem embedded dirancang untuk fungsi khusus perangkatnya. Fungsi itu boleh terdiri dari beberapa tugas, misalnya mesin cuci mengatur air, motor, dan layar.' },
+    { q: 'Pada Arduino Uno dan alat sederhana seperti rice cooker, bagian pemroses sistem embedded biasanya berupa…', o: ['Resistor', 'Mikrokontroler', 'Transformator', 'Kapasitor'], a: 1, e: 'Mikrokontroler berisi prosesor, memori, dan pin input/output dalam satu chip. Perangkat yang lebih kompleks bisa memakai mikroprosesor atau SoC.' },
     { q: 'Simbol flowchart untuk pertanyaan "Apakah tombol ditekan?" adalah…', o: ['Oval', 'Persegi panjang', 'Belah ketupat', 'Jajar genjang'], a: 2, e: 'Belah ketupat adalah simbol keputusan dengan jalur Ya dan Tidak.' },
     { q: 'Apa output kode ini?', code: 'int a = 7, b = 2;\nprintf("%d", a / b);', o: ['3.5', '3', '4', '1'], a: 1, e: 'Pembagian dua int membuang desimal: 7 / 2 = 3.' },
     { q: 'Manakah yang MEMBANDINGKAN dua nilai?', o: ['x = 5', 'x == 5', 'x := 5', 'x => 5'], a: 1, e: '= mengisi nilai, == membandingkan.' },
@@ -1436,7 +1667,9 @@
     $$('.debug-q', box).forEach((q, i) => {
       eds[i] = makeEditor($('.dbg-ed', q), { value: store.get('dbg' + i, DEBUG[i].code), lang: DEBUG[i].lang || 'c', auto: true, onChange: debounce(v => store.set('dbg' + i, v), 400) });
     });
-    onShow.asesmen = () => requestAnimationFrame(() => eds.forEach(e => e.refresh()));
+    const refresh = () => setTimeout(() => eds.forEach(e => e.refresh()), 0);
+    onShow.asesmen = refresh;
+    $('#s-debug').addEventListener('tabshow', refresh);
     box.addEventListener('click', async e => {
       const r = e.target.closest('[data-dreset]');
       if (r) { const i = +r.dataset.dreset; eds[i].set(DEBUG[i].code); store.set('dbg' + i, DEBUG[i].code); return; }
@@ -1461,34 +1694,73 @@
     });
   })();
 
+  // Rubrik mengikuti alat yang dipakai: simulator web ini hanya meminta siswa memilih pin
+  // (tanpa kabel dan nilai resistor), jadi kerapian kabel dan pemilihan resistor hanya
+  // dinilai untuk Wokwi atau board fisik.
   (function rubric() {
-    const AS = [
-      ['Rangkaian di simulator', 20, ['Benar, rapi, ada resistor yang tepat', 'Benar, kurang rapi', 'Ada 1 kesalahan sambungan', 'Tidak berfungsi']],
-      ['Kode program', 30, ['Berjalan, ada komentar, memakai fungsi/variabel bermakna', 'Berjalan tanpa komentar', 'Berjalan sebagian', 'Error']],
-      ['Flowchart', 15, ['Lengkap dan sesuai kode', 'Sedikit tidak sesuai', 'Kurang lengkap', 'Tidak ada']],
-      ['Presentasi', 20, ['Bisa menjelaskan setiap baris kode', 'Menjelaskan sebagian besar', 'Menjelaskan sebagian kecil', 'Tidak bisa menjelaskan']],
-      ['Kerja sama', 15, ['Kedua anggota aktif', 'Pembagian kerja kurang seimbang', 'Satu anggota dominan', 'Tidak bekerja sama']]
-    ];
+    const FUNGSI = ['Program fungsi', 25, ['Semua fungsi berjalan sesuai tujuan dan sudah diuji dengan beberapa kondisi input (misal gelap/terang, tombol ditekan/dilepas)', 'Fungsi utama berjalan, satu kondisi belum diuji atau masih keliru', 'Berjalan sebagian', 'Error atau tidak berjalan']];
+    const FLOW = ['Flowchart', 15, ['Lengkap dan sesuai kode', 'Sedikit tidak sesuai', 'Kurang lengkap', 'Tidak ada']];
+    const JELAS = ['Penjelasan sambungan & cara kerja', 20, ['Menjelaskan setiap sambungan (kaki komponen ke pin/5V/GND, fungsi resistor dan pull-up) serta setiap bagian kode', 'Menjelaskan sebagian besar', 'Menjelaskan sebagian kecil', 'Tidak bisa menjelaskan']];
+    const KERJA = ['Kerja sama', 10, ['Kedua anggota aktif', 'Pembagian kerja kurang seimbang', 'Satu anggota dominan', 'Tidak bekerja sama']];
+    const SETS = {
+      sim: {
+        label: 'Simulator web ini (memilih pin)',
+        note: 'Komponen dipasang dengan memilih pin, tanpa kabel dan tanpa memilih nilai resistor. Karena itu kerapian kabel dan pemilihan resistor tidak dinilai; yang dinilai ketepatan pemetaan pin, fungsi program, dan penjelasan sambungan.',
+        aspects: [
+          ['Ketepatan pemetaan pin', 15, ['Semua komponen di pin yang tepat dan sama dengan kode (PWM di pin ~, sensor di A0-A5), tercatat di tabel pin', 'Ada 1 ketidakcocokan kecil yang diperbaiki sendiri saat pengujian', 'Beberapa pin tidak cocok dengan kode sehingga sebagian fungsi tidak jalan', 'Pemetaan pin tidak sesuai, proyek tidak bisa diuji']],
+          FUNGSI,
+          ['Kualitas kode', 15, ['Ada komentar, nama variabel bermakna, memakai fungsi atau konstanta pin', 'Rapi tetapi minim komentar', 'Sulit dibaca, banyak angka langsung', 'Hasil salin tanpa perubahan atau tidak terbaca']],
+          FLOW, JELAS, KERJA
+        ]
+      },
+      fisik: {
+        label: 'Wokwi / board fisik',
+        note: 'Wokwi dan board fisik memakai kabel dan resistor sungguhan, jadi aspek rangkaian ikut dinilai.',
+        aspects: [
+          ['Rangkaian (kabel & resistor)', 20, ['Benar, kabel rapi, nilai resistor tepat (misal 220 Ω untuk LED)', 'Benar, tetapi kabel kurang rapi', 'Ada 1 kesalahan sambungan atau nilai resistor', 'Tidak berfungsi']],
+          FUNGSI,
+          ['Kualitas kode', 10, ['Ada komentar, nama variabel bermakna, memakai fungsi atau konstanta pin', 'Rapi tetapi minim komentar', 'Sulit dibaca, banyak angka langsung', 'Hasil salin tanpa perubahan atau tidak terbaca']],
+          FLOW, JELAS, KERJA
+        ]
+      }
+    };
     const LAB = ['4 · Sangat baik', '3 · Baik', '2 · Cukup', '1 · Kurang'];
-    let sel = store.get('rubric', {});
+    let mode = store.get('rubric-mode', 'sim');
+    let sel = {};
     $('#rub-name').value = store.get('rubric-name', '');
     $('#rub-name').addEventListener('input', debounce(() => store.set('rubric-name', $('#rub-name').value), 300));
-    $('#rubric').innerHTML = AS.map(([nm, w, ds], i) => `<fieldset class="rubric-row" style="border:0;margin:0;padding-inline:0"><legend class="head" style="display:flex;width:100%"><span style="color:var(--ink);font-family:var(--font-body)">${esc(nm)}</span><span style="margin-left:auto">bobot ${w}%</span></legend>
-      <div class="rubric-opts">${ds.map((dsc, k) => `<label><input type="radio" name="rub${i}" value="${4 - k}"${sel[i] === 4 - k ? ' checked' : ''}><b>${LAB[k]}</b>${esc(dsc)}</label>`).join('')}</div></fieldset>`).join('');
-    const calc = () => {
-      const filled = AS.every((_, i) => sel[i]);
-      const sum = AS.reduce((p, [, w], i) => p + (sel[i] || 0) * w / 100, 0);
-      $('#rub-total').textContent = filled ? (sum / 4 * 100).toFixed(1).replace(/\.0$/, '') : '–';
-      $('#rub-detail').textContent = filled ? `jumlah (skor × bobot) = ${sum.toFixed(2)} → ${sum.toFixed(2)} / 4 × 100` : `Pilih skor untuk ${AS.filter((_, i) => !sel[i]).length} aspek lagi.`;
+    const draw = () => {
+      const S = SETS[mode];
+      sel = store.get('rubric-' + mode, {});
+      $$('#rub-mode button').forEach(b => { b.classList.toggle('on', b.dataset.m === mode); b.setAttribute('aria-selected', b.dataset.m === mode ? 'true' : 'false'); });
+      $('#rub-note').textContent = S.note;
+      $('#rubric').innerHTML = S.aspects.map(([nm, w, ds], i) => `<fieldset class="rubric-row" style="border:0;margin:0;padding-inline:0"><legend class="head" style="display:flex;width:100%"><span style="color:var(--ink);font-family:var(--font-body)">${esc(nm)}</span><span style="margin-left:auto">bobot ${w}%</span></legend>
+        <div class="rubric-opts">${ds.map((dsc, k) => `<label><input type="radio" name="rub${i}" value="${4 - k}"${sel[i] === 4 - k ? ' checked' : ''}><b>${LAB[k]}</b>${esc(dsc)}</label>`).join('')}</div></fieldset>`).join('');
+      calc();
     };
+    const calc = () => {
+      const A = SETS[mode].aspects;
+      const filled = A.every((_, i) => sel[i]);
+      const sum = A.reduce((p, [, w], i) => p + (sel[i] || 0) * w / 100, 0);
+      $('#rub-total').textContent = filled ? (sum / 4 * 100).toFixed(1).replace(/\.0$/, '') : '–';
+      $('#rub-detail').textContent = filled ? `jumlah (skor × bobot) = ${sum.toFixed(2)} → ${sum.toFixed(2)} / 4 × 100` : `Pilih skor untuk ${A.filter((_, i) => !sel[i]).length} aspek lagi.`;
+    };
+    $('#rub-mode').innerHTML = Object.entries(SETS).map(([k, s]) => `<button type="button" role="tab" data-m="${k}">${esc(s.label)}</button>`).join('');
+    $('#rub-mode').addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      mode = b.dataset.m;
+      store.set('rubric-mode', mode);
+      draw();
+    });
     $('#rubric').addEventListener('change', e => {
       const inp = e.target.closest('input');
       if (!inp) return;
       sel[+inp.name.slice(3)] = +inp.value;
-      store.set('rubric', sel);
+      store.set('rubric-' + mode, sel);
       calc();
     });
-    calc();
+    draw();
   })();
 
   /* ============================== Referensi ============================== */
@@ -1503,38 +1775,106 @@
   })();
 
   (function cheat() {
+    // Setiap contoh kode bisa langsung disalin dan dijalankan; rentang nilai dijelaskan di keterangan,
+    // bukan di dalam kode (misalnya 0-255 di dalam program berarti pengurangan).
     const CH = [
-      ['printf("teks %d", x);', 'Menampilkan teks dan nilai', 'c'],
-      ['scanf("%d", &x);', 'Membaca input angka', 'c'],
-      ['%d  %f  %.2f  %c  %s', 'Penentu format: int, float, float 2 desimal, char, teks', 'c'],
-      ['cout << x << endl;', 'Output (C++)', 'cpp'],
-      ['cin >> x;', 'Input (C++)', 'cpp'],
-      ['if (kondisi) { } else { }', 'Percabangan', 'c cpp ard'],
-      ['switch (x) { case 1: ... break; default: ... }', 'Memilih dari beberapa nilai pasti', 'c cpp ard'],
-      ['for (int i = 0; i < n; i++) { }', 'Perulangan n kali', 'c cpp ard'],
-      ['while (kondisi) { }', 'Perulangan selama kondisi benar', 'c cpp ard'],
-      ['float hitung(float a, float b) { return a * b; }', 'Membuat fungsi dengan nilai kembalian', 'c cpp ard'],
-      ['int data[5] = {1, 2, 3, 4, 5};', 'Array 5 elemen (indeks 0-4)', 'c cpp ard'],
-      ['pinMode(pin, OUTPUT);  pinMode(pin, INPUT_PULLUP);', 'Mengatur fungsi pin', 'ard'],
-      ['digitalWrite(pin, HIGH);  digitalWrite(pin, LOW);', 'Menyalakan / mematikan output', 'ard'],
-      ['digitalRead(pin);', 'Membaca tombol (HIGH/LOW)', 'ard'],
-      ['analogRead(A0);', 'Membaca sensor analog (0-1023)', 'ard'],
-      ['analogWrite(pin, 0-255);', 'Output PWM (pin 3, 5, 6, 9, 10, 11)', 'ard'],
-      ['map(x, 0, 1023, 0, 255);', 'Mengubah rentang nilai', 'ard'],
-      ['delay(ms);', 'Menunggu (milidetik)', 'ard'],
-      ['Serial.begin(9600);', 'Memulai Serial Monitor (di setup)', 'ard'],
-      ['Serial.print(x);  Serial.println(x);', 'Menampilkan ke Serial Monitor (println pindah baris)', 'ard'],
-      ['tone(pin, frekuensi);  noTone(pin);', 'Membunyikan / mematikan buzzer', 'ard']
+      ['printf("Arus = %.2f A\\n", arus);', 'Menampilkan teks dan nilai variabel', 'c'],
+      ['scanf("%d", &x);', 'Membaca input angka ke variabel x (wajib pakai &)', 'c'],
+      ['%d   %f   %.2f   %c   %s', 'Penentu format di dalam teks printf/scanf: int, float, float 2 desimal, char, teks. Bukan perintah tersendiri.', 'c', true],
+      ['cout << x << endl;', 'Output (C++, pengayaan)', 'cpp'],
+      ['cin >> x;', 'Input (C++, pengayaan)', 'cpp'],
+      ['if (suhu > 30) { kipas = 1; } else { kipas = 0; }', 'Percabangan', 'c cpp ard'],
+      ['switch (pilih) { case 1: lama = 5; break; default: lama = 0; }', 'Memilih dari beberapa nilai pasti; akhiri setiap case dengan break', 'c cpp ard'],
+      ['for (int i = 0; i < 5; i++) { }', 'Perulangan 5 kali (i = 0 sampai 4)', 'c cpp ard'],
+      ['while (hitung > 0) { hitung--; }', 'Perulangan selama syarat benar; pastikan syaratnya suatu saat menjadi salah', 'c cpp ard'],
+      ['float hitungDaya(float v, float i) { return v * i; }', 'Membuat fungsi dengan nilai kembalian', 'c cpp ard'],
+      ['int data[5] = {1, 2, 3, 4, 5};', 'Array 5 elemen, indeks 0 sampai 4', 'c cpp ard'],
+      ['float x = 10.0 / 4;', 'Pembagian desimal (2.5). 10 / 4 menghasilkan 2 karena kedua operand int', 'c cpp ard'],
+      ['pinMode(13, OUTPUT);  pinMode(2, INPUT_PULLUP);', 'Mengatur fungsi pin (output, atau input dengan pull-up internal)', 'ard'],
+      ['digitalWrite(13, HIGH);  digitalWrite(13, LOW);', 'Menyalakan / mematikan output di pin 13', 'ard'],
+      ['int tombol = digitalRead(2);', 'Membaca tombol: HIGH saat dilepas, LOW saat ditekan (dengan INPUT_PULLUP)', 'ard'],
+      ['int nilai = analogRead(A0);', 'Membaca sensor analog; hasilnya 0 sampai 1023', 'ard'],
+      ['analogWrite(9, 128);', 'Output PWM. Nilai 0 sampai 255 (0 = mati, 255 = penuh, 128 ≈ setengah). Hanya pin 3, 5, 6, 9, 10, 11', 'ard'],
+      ['int terang = map(nilai, 0, 1023, 0, 255);', 'Mengubah rentang 0-1023 menjadi 0-255 (hasil bilangan bulat)', 'ard'],
+      ['delay(1000);', 'Menunggu dalam milidetik (1000 ms = 1 detik)', 'ard'],
+      ['Serial.begin(9600);', 'Memulai Serial Monitor (tulis di setup)', 'ard'],
+      ['Serial.print(nilai);  Serial.println(nilai);', 'Menampilkan ke Serial Monitor (println pindah baris)', 'ard'],
+      ['tone(8, 440);  noTone(8);', 'Membunyikan buzzer di pin 8 dengan frekuensi 440 Hz / mematikannya', 'ard']
     ];
     const box = $('#cheat');
     let k = 'all';
     const draw = () => {
-      box.innerHTML = CH.filter(r => k === 'all' || r[2].split(' ').includes(k)).map(([c, d]) => `<div class="cheat-row"><code>${esc(c)}</code><button class="btn btn-ghost small" type="button" data-copy="${esc(c)}" aria-label="Salin ${esc(c)}">${icon('copy')}</button><span class="d">${esc(d)}</span></div>`).join('');
+      box.innerHTML = CH.filter(r => k === 'all' || r[2].split(' ').includes(k)).map(([c, d, , info]) => `<div class="cheat-row"><code>${esc(c)}</code>${info ? '<span></span>' : `<button class="btn btn-ghost small" type="button" data-copy="${esc(c)}" aria-label="Salin ${esc(c)}">${icon('copy')}</button>`}<span class="d">${esc(d)}</span></div>`).join('');
     };
     box.addEventListener('click', e => { const b = e.target.closest('[data-copy]'); if (b) copyText(b.dataset.copy); });
     $$('#cheat-filter button').forEach(b => b.addEventListener('click', () => { k = b.dataset.k; $$('#cheat-filter button').forEach(x => x.classList.toggle('on', x === b)); draw(); }));
     draw();
   })();
+
+  /* ============================== HP: tombol mini & keyboard ============================== */
+  // Tombol Jalankan/Stop di bilah lengket meneruskan klik ke tombol utama dan mengikuti statusnya.
+  $$('[data-mini]').forEach(b => {
+    const target = document.getElementById(b.dataset.mini);
+    const primary = b.classList.contains('btn-primary');
+    const sync = () => {
+      b.disabled = target.disabled;
+      if (primary) b.innerHTML = target.innerHTML;
+    };
+    b.addEventListener('click', () => target.click());
+    new MutationObserver(sync).observe(target, { attributes: true, attributeFilter: ['disabled'], childList: true, subtree: true });
+    sync();
+  });
+  // Saat keyboard HP terbuka, bilah navigasi bawah disembunyikan agar editor dan terminal lebih lega.
+  const narrow = matchMedia('(max-width: 1023px)');
+  const editable = el => !!el && (el.isContentEditable || el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && !['checkbox', 'radio', 'range', 'file', 'button'].includes(el.type)));
+  const inCode = el => !!el && !!el.closest && !!el.closest('.CodeMirror, textarea.plain');
+  document.addEventListener('focusin', e => {
+    if (!narrow.matches || !editable(e.target)) return;
+    document.body.classList.add('typing');
+    document.body.classList.toggle('typing-code', inCode(e.target));
+  });
+  document.addEventListener('focusout', () => setTimeout(() => {
+    const a = document.activeElement;
+    if (!editable(a)) document.body.classList.remove('typing', 'typing-code');
+    else document.body.classList.toggle('typing-code', inCode(a));
+  }, 150));
+  // Tinggi keyboard di layar (iPhone tidak mengecilkan halaman), dipakai agar baris simbol tetap di atas keyboard.
+  if (window.visualViewport) {
+    const vv = window.visualViewport;
+    const kb = () => document.documentElement.style.setProperty('--kb', Math.max(0, window.innerHeight - vv.height - vv.offsetTop) + 'px');
+    vv.addEventListener('resize', kb);
+    vv.addEventListener('scroll', kb);
+    kb();
+  }
+
+  /* ============================== Offline ============================== */
+  const netbar = $('#netbar');
+  const updateNet = () => { netbar.hidden = navigator.onLine; };
+  window.addEventListener('online', updateNet);
+  window.addEventListener('offline', updateNet);
+  updateNet();
+  // Tautan ke situs lain butuh internet: diberi tanda ↗ dan peringatan saat offline.
+  $$('a[href^="http"]').forEach(a => {
+    a.classList.add('ext');
+    if (!a.title) a.title = 'Membuka situs lain (butuh internet)';
+  });
+  document.addEventListener('click', e => {
+    if (e.target.closest('a.ext') && !navigator.onLine) toast('Tautan ini butuh internet. Materi, compiler, dan simulator tetap bisa dipakai offline.');
+  });
+  // Service worker menyimpan salinan web agar bisa dibuka ulang tanpa jaringan (hanya di https atau localhost).
+  const offStatus = $('#offline-status');
+  const setOff = (text, cls) => { if (offStatus) { offStatus.textContent = text; offStatus.className = 'tag ' + (cls || ''); } };
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname))) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => navigator.serviceWorker.ready)
+        .then(() => caches.keys())
+        .then(keys => setOff(keys.some(k => k.startsWith('modul-embedded-')) ? 'Tersimpan: bisa dibuka ulang tanpa internet di browser ini' : 'Sedang menyimpan…', keys.length ? 'ok' : ''))
+        .catch(() => setOff('Tidak bisa disimpan untuk offline di browser ini', 'warn'));
+    });
+  } else {
+    setOff(location.protocol === 'file:' ? 'Dibuka dari file lokal: tidak perlu internet' : 'Penyimpanan offline tidak tersedia di sini', location.protocol === 'file:' ? 'ok' : 'warn');
+  }
 
   route();
 })();

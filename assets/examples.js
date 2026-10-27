@@ -75,6 +75,23 @@ int main() {
     return 0;
 }`
   },
+  'b2-bagi': {
+    title: 'Tipe operand menentukan hasil bagi', lang: 'c', code: String.raw`#include <stdio.h>
+
+int main() {
+    int a = 10, b = 4;
+    float x1 = 10 / 4;        // int / int     -> 2, lalu disimpan 2.0
+    float x2 = 10.0 / 4;      // desimal / int -> 2.5
+    float x3 = (float)a / b;  // a diubah ke float dulu -> 2.5
+    int   y  = 10.0 / 4;      // 2.5 dipotong saat disimpan ke int -> 2
+
+    printf("float x1 = 10 / 4;       -> %.1f\n", x1);
+    printf("float x2 = 10.0 / 4;     -> %.1f\n", x2);
+    printf("float x3 = (float)a / b; -> %.1f\n", x3);
+    printf("int   y  = 10.0 / 4;     -> %d\n", y);
+    return 0;
+}`
+  },
   'b2-tugas-ohm': {
     title: 'Tugas 2.1: kalkulator hukum Ohm', lang: 'c', code: String.raw`#include <stdio.h>
 
@@ -110,16 +127,18 @@ int main() {
     title: 'Tugas 2.3: resistor untuk LED', lang: 'c', code: String.raw`#include <stdio.h>
 
 int main() {
-    float vs, vled, ima;
+    float vs, vled, i_mA;
     printf("Tegangan sumber (V): ");
     scanf("%f", &vs);
     printf("Tegangan LED (V): ");
     scanf("%f", &vled);
     printf("Arus LED (mA): ");
-    scanf("%f", &ima);
+    scanf("%f", &i_mA);
 
-    // Ingat: rumus memakai arus dalam ampere, jadi ubah mA ke A dulu
-    // TODO: R = (vs - vled) / I
+    // Rumus memakai arus dalam AMPERE: I (A) = i_mA / 1000.0  (20 mA = 0.02 A)
+    // TODO: hitung R = (vs - vled) / (i_mA / 1000.0), hasilnya dalam ohm
+    // TODO: tampilkan R, misalnya: printf("R = %.0f ohm\n", R);
+    // Data uji: 5 V, 2 V, 20 mA  ->  R = 150 ohm
 
     return 0;
 }`
@@ -201,12 +220,13 @@ int main() {
 
 int main() {
     int pilih;
+    // Urutan nyala: 1 = merah 5 detik, 2 = hijau 5 detik, 3 = kuning 2 detik
     printf("Pilih lampu (1/2/3): ");
     scanf("%d", &pilih);
 
     switch (pilih) {
         case 1: printf("Merah, menyala 5 detik\n"); break;
-        // TODO: lengkapi case 2 (Kuning, 2 detik) dan case 3 (Hijau, 5 detik)
+        // TODO: lengkapi case 2 (Hijau, 5 detik) dan case 3 (Kuning, 2 detik)
         default: printf("Pilihan tidak ada\n");
     }
     return 0;
@@ -296,14 +316,15 @@ int main() {
   'b4-tugas-rled': {
     title: 'Tugas 4.1: fungsi hitungRLED', lang: 'c', code: String.raw`#include <stdio.h>
 
-// TODO: lengkapi isi fungsi. i dalam ampere.
-float hitungRLED(float vs, float vled, float i) {
+// TODO: lengkapi isi fungsi. Arus i_mA dalam miliampere:
+// ubah ke ampere dengan i_mA / 1000.0, hasil R dalam ohm.
+float hitungRLED(float vs, float vled, float i_mA) {
     return 0;
 }
 
 int main() {
-    printf("LED merah 5V, 2V, 20mA -> R = %.0f ohm\n", hitungRLED(5, 2, 0.02));
-    printf("LED biru  5V, 3V, 20mA -> R = %.0f ohm\n", hitungRLED(5, 3, 0.02));
+    printf("LED merah 5V, 2V, 20mA -> R = %.0f ohm\n", hitungRLED(5, 2, 20));   // harus 150
+    printf("LED biru  5V, 3V, 20mA -> R = %.0f ohm\n", hitungRLED(5, 3, 20));   // harus 100
     return 0;
 }`
   },

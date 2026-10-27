@@ -544,22 +544,23 @@
       $('#cc-fname').textContent = l === 'c' ? 'main.c' : 'main.cpp';
       this.ed.setMode(mimeOf(l));
     },
-    load(id) {
-      const ex = EX[id];
+    load(id) { this.loadCode(EX[id].code, EX[id].lang || 'c'); },
+    loadCode(code, lang) {
       this.stop();
-      this.setLang(ex.lang || 'c', false);
-      this.ed.set(ex.code);
-      store.set('cc-code-' + this.lang, ex.code);
+      this.setLang(lang, false);
+      this.ed.set(code);
+      store.set('cc-code-' + this.lang, code);
       this.ed.clearMarks();
       $('#cc-diags').innerHTML = '';
       this.term.clear();
       this.pane('code');
     },
-    open(id, opts) {
+    open(id, opts) { this.openCode(EX[id].code, EX[id].lang || 'c', opts); },
+    openCode(code, lang, opts) {
       go('compiler');
       this.init();
-      this.load(id);
-      requestAnimationFrame(() => { this.ed.refresh(); if (opts && opts.step) this.run(true); });
+      this.loadCode(code, lang);
+      setTimeout(() => { this.ed.refresh(); if (opts && opts.step) this.run(true); }, 30);
     },
     busy(on) {
       $('#cc-run').disabled = on;
@@ -1304,34 +1305,117 @@
     draw();
   })();
 
+  // Petunjuk bertahap: menuntun cara menelusuri program tanpa menyebut output akhirnya.
   const TRACE = [
-    { code: '#include <stdio.h>\n\nint main() {\n    int a = 7, b = 2;\n    printf("%d %d\\n", a / b, a % b);\n    return 0;\n}' },
-    { code: '#include <stdio.h>\n\nint main() {\n    for (int i = 10; i >= 1; i -= 3) {\n        printf("%d ", i);\n    }\n    return 0;\n}' },
-    { code: '#include <stdio.h>\n\nint main() {\n    int pita = 1;\n    switch (pita) {\n        case 0: printf("Hitam\\n");\n        case 1: printf("Coklat\\n");\n        case 2: printf("Merah\\n"); break;\n        case 3: printf("Oranye\\n");\n    }\n    return 0;\n}' },
-    { code: '#include <stdio.h>\n\nint main() {\n    int x = 1;\n    while (x < 20) {\n        x = x * 3;\n    }\n    printf("%d\\n", x);\n    return 0;\n}' },
-    { code: '#include <stdio.h>\n\nint main() {\n    float r = 5 / 2;\n    printf("%.1f\\n", r);\n    return 0;\n}' }
+    {
+      code: '#include <stdio.h>\n\nint main() {\n    int a = 7, b = 2;\n    printf("%d %d\\n", a / b, a % b);\n    return 0;\n}',
+      hints: [
+        '<code>a</code> dan <code>b</code> bertipe <code>int</code>. Pembagian dua <code>int</code> membuang angka di belakang koma (dipotong, bukan dibulatkan).',
+        'Hitung <code>a / b</code> dulu: 7 ÷ 2 = 3,5, lalu buang desimalnya. Untuk <code>a % b</code>, cari sisa bagi: 7 = 2 × (hasil tadi) + sisa berapa?',
+        'Format <code>"%d %d\\n"</code> mencetak dua bilangan bulat dipisah satu spasi, urut sesuai nilai setelah koma: <code>a / b</code> dulu, lalu <code>a % b</code>.'
+      ]
+    },
+    {
+      code: '#include <stdio.h>\n\nint main() {\n    for (int i = 10; i >= 1; i -= 3) {\n        printf("%d ", i);\n    }\n    return 0;\n}',
+      hints: [
+        'Baca bagian <code>for</code>: mulai dari <code>i = 10</code>, ulangi selama <code>i &gt;= 1</code>, dan setiap putaran <code>i -= 3</code> (i dikurangi 3).',
+        'Buat tabel di kertas. Putaran ke-1: i = 10, cek 10 &gt;= 1, benar, cetak. Putaran ke-2: i = 10 − 3 = … Teruskan sampai syaratnya salah.',
+        'Hati-hati di akhir: angka yang sama dengan 1 tetap memenuhi <code>i &gt;= 1</code>. Semua angka tercetak di <b>satu baris</b> karena printf hanya menambahkan spasi, tanpa <code>\\n</code>.'
+      ]
+    },
+    {
+      code: '#include <stdio.h>\n\nint main() {\n    int pita = 1;\n    switch (pita) {\n        case 0: printf("Hitam\\n");\n        case 1: printf("Coklat\\n");\n        case 2: printf("Merah\\n"); break;\n        case 3: printf("Oranye\\n");\n    }\n    return 0;\n}',
+      hints: [
+        '<code>pita</code> bernilai 1, jadi program langsung melompat ke <code>case 1:</code>. Case di atasnya tidak dijalankan.',
+        'Setelah masuk ke sebuah case, program terus berjalan ke baris di bawahnya sampai bertemu <code>break</code> atau akhir switch.',
+        'Cari <code>break</code> pertama di bawah <code>case 1:</code>. Semua printf di antaranya dijalankan, masing-masing di baris sendiri karena ada <code>\\n</code>.'
+      ]
+    },
+    {
+      code: '#include <stdio.h>\n\nint main() {\n    int x = 1;\n    while (x < 20) {\n        x = x * 3;\n    }\n    printf("%d\\n", x);\n    return 0;\n}',
+      hints: [
+        'Hanya ada satu <code>printf</code>, dan letaknya <b>setelah</b> perulangan selesai. Jadi yang tercetak hanya satu angka: nilai akhir <code>x</code>.',
+        'Telusuri: x = 1, cek 1 &lt; 20 benar, x menjadi 1 × 3 = 3. Cek 3 &lt; 20 benar, x menjadi … Lanjutkan sendiri.',
+        'Perulangan berhenti saat <code>x &lt; 20</code> pertama kali bernilai salah. Nilai x pada saat itu boleh lebih besar dari 20.'
+      ]
+    },
+    {
+      code: '#include <stdio.h>\n\nint main() {\n    float r = 5 / 2;\n    printf("%.1f\\n", r);\n    return 0;\n}',
+      hints: [
+        'Kerjakan sisi kanan tanda <code>=</code> lebih dulu: <code>5</code> dan <code>2</code> sama-sama bilangan bulat, jadi <code>5 / 2</code> adalah pembagian <code>int</code>.',
+        'Desimalnya sudah terbuang <b>sebelum</b> hasilnya disimpan ke <code>r</code>. Menyimpan ke <code>float</code> tidak mengembalikan angka yang sudah hilang.',
+        '<code>%.1f</code> mencetak tepat satu angka di belakang tanda desimal, dan di C tanda desimalnya titik.'
+      ]
+    }
   ];
   const norm = s => s.replace(/\r/g, '').split('\n').map(l => l.replace(/\s+$/, '')).join('\n').replace(/\n+$/, '');
+  // Menunjukkan bagian mana yang keliru tanpa membocorkan output yang benar.
+  function traceFeedback(guess, actual) {
+    const g = norm(guess), a = norm(actual);
+    if (g.replace(/,/g, '.') === a) return 'Hampir! Di C, angka desimal ditulis dengan titik, bukan koma.';
+    if (g.replace(/\s+/g, '') === a.replace(/\s+/g, '')) return 'Angka/teksnya sudah benar, tetapi spasi atau pindah barisnya belum tepat. Perhatikan setiap spasi dan \\n di dalam printf.';
+    const gl = g.split('\n'), al = a.split('\n');
+    if (gl.length !== al.length) return 'Jumlah baris tebakanmu belum tepat. Hitung berapa kali \\n tercetak selama program berjalan.';
+    const right = gl.map((l, k) => l === al[k]);
+    if (gl.length > 1 && right.some(Boolean)) {
+      const list = ok => right.map((r, k) => (r === ok ? k + 1 : 0)).filter(Boolean).join(', ');
+      return `Baris ${list(true)} sudah benar, baris ${list(false)} belum.`;
+    }
+    return 'Belum tepat.';
+  }
   (function traceQuiz() {
     const box = $('#trace-quiz');
+    const st = TRACE.map(() => ({ hints: 0 }));
     box.innerHTML = TRACE.map((t, i) => `<div class="q trace-q" data-t="${i}"><div class="q-head"><span class="n">${String(i + 1).padStart(2, '0')}</span><b>Apa output program ini?</b></div>
       <div class="snippet"><pre>${hlLines(t.code, 'text/x-csrc').map((l, k) => `<span class="ln" data-n="${k + 1}">${l || ' '}</span>`).join('')}</pre></div>
       <label class="field">Tebakanmu<textarea id="tr-${i}" rows="3" spellcheck="false" autocapitalize="off" placeholder="Tulis persis seperti yang muncul di layar"></textarea></label>
-      <div class="btn-row"><button class="btn btn-primary small" type="button" data-check="${i}">Periksa</button><span class="verdict" aria-live="polite"></span></div>
+      <div class="btn-row"><button class="btn btn-primary small" type="button" data-act="check">Periksa</button><button class="btn btn-ghost small" type="button" data-act="hint">Minta petunjuk</button><span class="verdict" aria-live="polite"></span></div>
+      <ol class="hints" aria-live="polite" hidden></ol>
+      <div class="btn-row trace-more" hidden><span class="small muted">Masih buntu?</span><button class="btn btn-ghost small" type="button" data-act="step">${icon('step')}Telusuri langkah demi langkah</button><button class="btn btn-ghost small" type="button" data-act="reveal">Lihat jawaban</button></div>
       <div class="decl-out" hidden></div></div>`).join('');
+    const nextHint = (i, q) => {
+      const s = st[i], all = TRACE[i].hints;
+      if (s.hints < all.length) {
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="hint-k">Petunjuk ${s.hints + 1} dari ${all.length}</span>${all[s.hints]}`;
+        $('.hints', q).appendChild(li);
+        $('.hints', q).hidden = false;
+        s.hints++;
+      }
+      if (s.hints >= all.length) {
+        $('[data-act="hint"]', q).hidden = true;
+        $('.trace-more', q).hidden = false;
+      }
+    };
     box.addEventListener('click', async e => {
-      const b = e.target.closest('[data-check]');
+      const b = e.target.closest('[data-act]');
       if (!b) return;
-      const i = +b.dataset.check, q = b.closest('.q');
-      const r = await runHeadless(TRACE[i].code, 'c', '');
-      const guess = $('#tr-' + i).value;
-      const ok = norm(guess) === norm(r.out);
+      const q = b.closest('.q'), i = +q.dataset.t, act = b.dataset.act;
       const v = $('.verdict', q);
-      v.textContent = ok ? 'Tepat!' : 'Belum tepat. Bandingkan dengan output sebenarnya:';
-      v.className = 'verdict ' + (ok ? 'ok' : 'bad');
-      const o = $('.decl-out', q);
-      o.hidden = false;
-      o.textContent = 'Output sebenarnya:\n' + (r.out || '(kosong)');
+      if (act === 'hint') { nextHint(i, q); return; }
+      if (act === 'step') { Compiler.openCode(TRACE[i].code, 'c', { step: true }); return; }
+      const r = await runHeadless(TRACE[i].code, 'c', '');
+      if (act === 'reveal') {
+        const o = $('.decl-out', q);
+        o.hidden = false;
+        o.textContent = 'Output program:\n' + (r.out || '(kosong)');
+        v.textContent = 'Bandingkan dengan tebakanmu, lalu cari langkah mana yang terlewat.';
+        v.className = 'verdict';
+        return;
+      }
+      const guess = $('#tr-' + i).value;
+      if (!guess.trim()) { v.textContent = 'Tulis dulu tebakanmu di kotak di atas.'; v.className = 'verdict bad'; return; }
+      if (norm(guess) === norm(r.out)) {
+        v.textContent = st[i].hints ? `Tepat! (dengan ${st[i].hints} petunjuk)` : 'Tepat!';
+        v.className = 'verdict ok';
+        $('[data-act="hint"]', q).hidden = true;
+        $('.trace-more', q).hidden = true;
+        return;
+      }
+      const used = st[i].hints >= TRACE[i].hints.length;
+      v.textContent = traceFeedback(guess, r.out) + (used ? '' : ' Baca petunjuk di bawah, lalu coba lagi.');
+      v.className = 'verdict bad';
+      if (!used) nextHint(i, q);
     });
   })();
 

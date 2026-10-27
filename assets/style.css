@@ -639,3 +639,8 @@ mark { background: var(--copper-soft); color: inherit; border-radius: 3px; paddi
 details.reveal summary code, .q-head code, .callout code { white-space: normal; overflow-wrap: anywhere; }
 details.reveal, details.reveal summary { min-width: 0; }
 .decl-out { white-space: pre-wrap; overflow-wrap: anywhere; }
+/* petunjuk bertahap di soal tebak output */
+.hints { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.hints li { border-left: 3px solid var(--copper); background: var(--copper-soft); padding: 8px 12px; border-radius: 0 var(--r-m) var(--r-m) 0; font-size: var(--fs-s); line-height: 1.5; }
+.hints .hint-k { display: block; font-weight: 700; font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; color: var(--copper); }
+.hints code { white-space: normal; }
